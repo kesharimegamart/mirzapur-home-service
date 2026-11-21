@@ -1,152 +1,73 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin | Mirzapur Home Service</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f6f2ff;color:#28143f}
-header{background:#59209d;color:white;text-align:center;padding:32px 12px}
-header h1{font-size:27px;margin:10px 0}
-header p{margin:8px}
-main{max-width:650px;margin:35px auto;padding:15px}
-.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px;box-shadow:0 4px 16px #ddd2ed}
-input{width:100%;padding:15px;margin:10px 0;border:1px solid #bbb;border-radius:9px;font-size:16px}
-button{background:#6225ab;color:white;border:0;padding:14px 25px;border-radius:9px;font-size:16px;cursor:pointer}
-button:disabled{opacity:.6}
-.hide{display:none}
-#status{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
-.success{color:green}
-.error{color:#c62828}
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,Arial,sans-serif;background:#f6f2ff;color:#28143f}header{background:#59209d;color:white;text-align:center;padding:25px 12px}header h1{margin:0 0 8px;font-size:26px}main{max-width:980px;margin:22px auto;padding:0 14px}.card{background:white;padding:22px;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px #ddd2ed}input{width:100%;padding:13px;margin:8px 0;border:1px solid #bbb;border-radius:9px;font:inherit}button{background:#6225ab;color:white;border:0;padding:12px 20px;border-radius:9px;font:inherit;cursor:pointer;margin:5px 5px 5px 0}button:disabled{opacity:.6;cursor:not-allowed}.hide{display:none!important}#status{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}.error{color:#b42318}.success{color:#147d3d}.muted{color:#655b70;font-size:14px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:580px}th,td{padding:12px 9px;text-align:left;border-bottom:1px solid #e8e1ef;font-size:14px;overflow-wrap:anywhere}th{background:#f7f2ff}.pill{display:inline-block;padding:4px 9px;border-radius:20px;background:#eee6fa}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar input{max-width:350px}a{color:#59209d}
 </style>
 </head>
 <body>
-
-<header>
-<h1>Mirzapur Home Service</h1>
-<p>Secure Admin Login</p>
-</header>
-
+<header><h1>🏠 Mirzapur Home Service</h1><div>Secure Admin Dashboard</div></header>
 <main>
-<div class="card" id="loginPanel">
-<h2>Admin Login</h2>
-<form id="loginForm">
-<input type="email" id="email" placeholder="Admin Email" required>
-<input type="password" id="password" placeholder="Password" required>
-<button type="submit" id="loginBtn">Login</button>
-</form>
-</div>
-
-<div class="card hide" id="dashboard">
-<h2>Admin Dashboard</h2>
-<p class="success">Admin Login Successful!</p>
-<p>आपकी Admin पहचान सत्यापित हो गई है।</p>
-<p>Customer Management, Payment Approval, Subscription और Referral System अगले चरण में जोड़े जाएँगे।</p>
-<button id="logoutBtn">Logout</button>
-</div>
-
-<div class="card">
-<h3>System Status</h3>
-<div id="status" role="status" aria-live="polite">JavaScript शुरू हो रहा है...</div>
-</div>
+<section class="card" id="loginPanel"><h2>Admin Login</h2><form id="loginForm"><label for="email">Admin Email</label><input type="email" id="email" autocomplete="username" required><label for="password">Password</label><input type="password" id="password" autocomplete="current-password" required><button id="loginBtn" type="submit">Login</button></form></section>
+<section id="dashboard" class="hide">
+<div class="card"><h2>Admin Dashboard</h2><p class="success">✓ Admin पहचान सत्यापित है।</p><p id="adminEmail" class="muted"></p><button id="refreshBtn" type="button">Refresh Customers</button><button id="logoutBtn" type="button">Logout</button></div>
+<div class="card"><h2>Registered Customers <span id="customerCount" class="pill">0</span></h2><p class="muted">यह सूची केवल पढ़ने के लिए है। Payment और Referral Credit की सुविधा सुरक्षा नियम तैयार होने के बाद जोड़ी जाएगी।</p><div class="toolbar"><input id="search" placeholder="नाम, मोबाइल या ईमेल खोजें" aria-label="Search customers"></div><p id="customerMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>नाम</th><th>मोबाइल</th><th>ईमेल</th><th>Referral</th><th>Subscription</th><th>Registration</th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
+<div class="card"><h2>आगे जोड़े जाने वाले Modules</h2><p>Payment Verification, Plan Activation / Upgrade, Remaining Services, Referral Commission और Wallet Ledger.</p><p class="muted">इनमें से कोई भी Payment या Credit कार्रवाई इस पेज से अभी नहीं की जा सकती।</p></div>
+</section>
+<div class="card"><h3>System Status</h3><div id="status" role="status" aria-live="polite">Firebase से कनेक्ट हो रहा है...</div></div>
 </main>
-
-<script>
-const statusBox=document.getElementById("status");
-const loginBtn=document.getElementById("loginBtn");
-
-function showStatus(message,error=false){
- statusBox.textContent=message;
- statusBox.className=error?"error":"";
-}
-
-window.addEventListener("error",function(e){
- showStatus("JavaScript Error: "+e.message,true);
-});
-
-window.addEventListener("unhandledrejection",function(e){
- showStatus("System Error: "+String(e.reason),true);
-});
-</script>
-
 <script type="module">
 const $=id=>document.getElementById(id);
-
-try {
- showStatus("Firebase से कनेक्ट हो रहा है...");
-
- const {auth,db}=await import("./firebase-config.js");
-
- const {
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
- }=await import("https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js");
-
- const {doc,getDoc}=await import("https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js");
-
- showStatus("Firebase Connected. Admin Login करें।");
-
- let busy=false;
-
- $("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  if(busy)return;
-  busy=true;
-  loginBtn.disabled=true;
-  showStatus("Login प्रक्रिया शुरू हो गई है...");
-
-  try{
-   const email=$("email").value.trim();
-   const password=$("password").value;
-
-   showStatus("Firebase Authentication जाँच रहा है...");
-
-   const result=await signInWithEmailAndPassword(auth,email,password);
-
-   showStatus("Login सफल। Admin Permission जाँच रहे हैं...");
-
-   const snapshot=await getDoc(doc(db,"admins",result.user.uid));
-
-   if(!snapshot.exists() || snapshot.data().active!==true){
-    showStatus("Login सफल, लेकिन Admin Permission नहीं मिली। Firestore में Admin UID और active=true सेट करना होगा।",true);
-    await signOut(auth);
-    return;
-   }
-
-   $("loginPanel").classList.add("hide");
-   $("dashboard").classList.remove("hide");
-   $("password").value="";
-   showStatus("Admin Verified Successfully!");
-
-  }catch(error){
-   showStatus("Login Error: "+error.code+"\n"+error.message,true);
-  }finally{
-   busy=false;
-   loginBtn.disabled=false;
-  }
- });
-
- $("logoutBtn").addEventListener("click",async()=>{
-  await signOut(auth);
-  $("dashboard").classList.add("hide");
-  $("loginPanel").classList.remove("hide");
-  showStatus("Logout सफल।");
- });
-
- onAuthStateChanged(auth,user=>{
-  if(!user){
-   $("dashboard").classList.add("hide");
-   $("loginPanel").classList.remove("hide");
-  }
- });
-
-}catch(error){
- showStatus("Firebase Load Error: "+(error.message||String(error)),true);
+const status=$('status');
+const showStatus=(message,error=false)=>{status.textContent=message;status.className=error?'error':''};
+let auth,db,signOut,getDocs,collection,doc,getDoc,adminVerified=false,customers=[];
+function renderCustomers(){
+ const term=$('search').value.trim().toLowerCase();
+ const filtered=customers.filter(c=>[c.name,c.mobile,c.phone,c.email,c.referralCodeUsed,c.referredBy].some(v=>String(v||'').toLowerCase().includes(term)));
+ $('customerRows').replaceChildren();
+ for(const c of filtered){
+  const tr=document.createElement('tr');
+  let date='—';try{const ts=c.createdAt;if(ts&&typeof ts.toDate==='function')date=ts.toDate().toLocaleDateString('hi-IN')}catch{}
+  const values=[c.name||'—',c.mobile||c.phone||'—',c.email||'—',c.referralCodeUsed||c.referredBy||'—',c.subscriptionStatus||'inactive',date];
+  for(const value of values){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}
+  $('customerRows').append(tr);
+ }
+ $('customerCount').textContent=String(customers.length);
+ $('customerMessage').textContent=customers.length?`${filtered.length} ग्राहक दिख रहे हैं।`:'कोई ग्राहक रिकॉर्ड नहीं मिला।';
 }
+async function loadCustomers(){
+ if(!adminVerified)return;
+ $('refreshBtn').disabled=true;$('customerMessage').textContent='ग्राहक सूची लोड हो रही है...';
+ try{const snap=await getDocs(collection(db,'customers'));customers=snap.docs.map(d=>({uid:d.id,...d.data()}));renderCustomers();showStatus('Admin Verified • Customer List Updated');}
+ catch(err){$('customerMessage').textContent='Customer List नहीं खुली: '+(err.code||err.message);showStatus('Firestore Rules में Admin को customers Collection पढ़ने की अनुमति जाँचनी होगी।',true)}
+ finally{$('refreshBtn').disabled=false}
+}
+function hideDashboard(){adminVerified=false;customers=[];$('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide');$('customerRows').replaceChildren();$('customerCount').textContent='0'}
+async function verifyAdmin(user){
+ if(!user){hideDashboard();showStatus('Admin Login करें।');return}
+ try{
+  const snapshot=await getDoc(doc(db,'admins',user.uid));
+  if(!snapshot.exists()||snapshot.data().active!==true){hideDashboard();showStatus('इस अकाउंट को Admin अनुमति नहीं मिली है।',true);await signOut(auth);return}
+  adminVerified=true;$('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide');$('adminEmail').textContent=user.email||'';$('password').value='';showStatus('Admin Verified Successfully!');await loadCustomers();
+ }catch(err){hideDashboard();showStatus('Admin Verification Failed: '+(err.code||err.message),true)}
+}
+try{
+ const config=await import('./firebase-config.js');auth=config.auth;db=config.db;
+ const authLib=await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+ const fs=await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+ signOut=authLib.signOut;({getDocs,collection,doc,getDoc}=fs);
+ $('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('loginBtn').disabled=true;showStatus('Login जाँच रहे हैं...');
+  try{await authLib.signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}
+  catch(err){showStatus('Login Error: '+(err.code||err.message),true)}
+  finally{$('loginBtn').disabled=false}
+ });
+ $('logoutBtn').addEventListener('click',async()=>{try{await signOut(auth)}catch(err){showStatus('Logout Error: '+err.message,true)}});
+ $('refreshBtn').addEventListener('click',loadCustomers);$('search').addEventListener('input',renderCustomers);
+ authLib.onAuthStateChanged(auth,user=>{void verifyAdmin(user)});
+}catch(err){showStatus('Firebase Load Error: '+(err.code||err.message),true)}
 </script>
-
 </body>
 </html>
