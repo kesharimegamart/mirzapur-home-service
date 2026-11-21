@@ -1,44 +1,65 @@
 <!doctype html>
 <html lang="hi">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Customer Registration | Mirzapur Home Service</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f3ff;font:16px system-ui,Arial;color:#29173f}header{background:#59239c;color:#fff;text-align:center;padding:25px 12px}main{max-width:520px;margin:22px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;box-shadow:0 5px 20px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{margin-top:20px;width:100%;padding:14px;background:#6228a8;color:#fff;border:0;border-radius:9px;font:inherit;cursor:pointer}button:disabled{opacity:.6}#status{white-space:pre-wrap;margin-top:16px;line-height:1.5}.hint{font-size:13px;color:#655873}.ok{color:#167337}.error{color:#b42318}
+*{box-sizing:border-box}body{margin:0;background:#f6f3ff;font:16px system-ui,Arial;color:#29173f}header{background:#59239c;color:#fff;text-align:center;padding:25px 12px}main{max-width:520px;margin:22px auto;padding:0 15px}.card{background:#fff;border-radius:16px;padding:24px;box-shadow:0 5px 20px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{margin-top:20px;width:100%;padding:14px;background:#6228a8;color:#fff;border:0;border-radius:9px;font:inherit;cursor:pointer}button:disabled{opacity:.6}#status{white-space:pre-wrap;margin-top:16px;line-height:1.5}.hint{font-size:13px;color:#655873}.ok{color:#167337}.error{color:#b42318}
 </style>
 </head>
-<body><header><h1>Mirzapur Home Service</h1><p>Customer Registration</p></header>
-<main><div class="card"><h2>नई Customer ID बनाएँ</h2>
+<body>
+<header><h1>Mirzapur Home Service</h1><p>Customer Registration</p></header>
+<main><div class="card">
+<h2>नई Customer ID बनाएँ</h2>
 <form id="registration">
 <label for="name">पूरा नाम</label><input id="name" required maxlength="80" autocomplete="name">
 <label for="phone">मोबाइल नंबर</label><input id="phone" required inputmode="numeric" pattern="[6-9][0-9]{9}" maxlength="10" placeholder="10 अंकों का मोबाइल नंबर" autocomplete="tel">
 <label for="email">ईमेल</label><input id="email" required type="email" autocomplete="email">
 <label for="password">पासवर्ड</label><input id="password" required type="password" minlength="8" autocomplete="new-password">
 <label for="referral">Referral Code (वैकल्पिक)</label><input id="referral" maxlength="32" placeholder="अगर किसी ने रेफर किया है">
-<p class="hint">अकाउंट बनने के बाद भी Subscription निष्क्रिय रहेगा। भुगतान सत्यापित होने पर ही सर्विस शुरू होगी।</p>
-<button id="submit" type="submit">Register</button></form><div id="status" role="status" aria-live="polite"></div></div></main>
+<p class="hint">Registration के बाद Subscription inactive रहेगा। Referral Code और Payment की पुष्टि Admin/सुरक्षित Backend करेगा। पुष्टि से पहले कोई Commission नहीं जुड़ेगा।</p>
+<button id="submit" type="submit">Register</button>
+</form><div id="status" role="status" aria-live="polite"></div>
+</div></main>
 <script type="module">
 import {auth,db} from './firebase-config.js';
 import {createUserWithEmailAndPassword,signOut} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
-import {doc,runTransaction,serverTimestamp} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+import {doc,setDoc,serverTimestamp} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
 const $=id=>document.getElementById(id);
 const form=$('registration'),status=$('status'),submit=$('submit');
-const params=new URLSearchParams(location.search);
-const prefill=params.get('ref');if(prefill) $('referral').value=prefill.slice(0,32);
+const prefill=new URLSearchParams(location.search).get('ref');
+if(prefill)$('referral').value=prefill.slice(0,32).toUpperCase();
 form.addEventListener('submit',async e=>{
- e.preventDefault();status.className='';status.textContent='Registration जारी है...';submit.disabled=true;
- const name=$('name').value.trim(),phone=$('phone').value.trim(),email=$('email').value.trim(),password=$('password').value,referral=$('referral').value.trim().toUpperCase();
- if(!name||!/^[6-9]\d{9}$/.test(phone)||password.length<8||!/^([A-Z0-9_-]{1,32})?$/.test(referral)){status.className='error';status.textContent='नाम, मोबाइल नंबर, पासवर्ड या Referral Code जाँचें।';submit.disabled=false;return;}
- let user=null;
+ e.preventDefault();submit.disabled=true;status.className='';status.textContent='Registration जारी है...';
+ const name=$('name').value.trim();
+ const mobile=$('phone').value.trim();
+ const email=$('email').value.trim().toLowerCase();
+ const password=$('password').value;
+ const referredBy=$('referral').value.trim().toUpperCase();
+ if(!name||!/^[6-9]\d{9}$/.test(mobile)||password.length<8||!/^([A-Z0-9_-]{1,32})?$/.test(referredBy)){
+  status.className='error';status.textContent='नाम, मोबाइल, पासवर्ड या Referral Code जाँचें।';submit.disabled=false;return;
+ }
+ let accountCreated=false;
  try{
-  const credential=await createUserWithEmailAndPassword(auth,email,password);user=credential.user;
-  // Registration only writes a restricted customer profile. It cannot activate plans or credit money.
-  await runTransaction(db,async tx=>{
-   if(referral){const refSnap=await tx.get(doc(db,'referralCodes',referral));if(!refSnap.exists()||refSnap.data().active!==true||refSnap.data().ownerUid===user.uid)throw new Error('Referral Code मान्य नहीं है।');}
-   tx.set(doc(db,'customers',user.uid),{name,phone,email:user.email,referralCodeUsed:referral,createdAt:serverTimestamp()});
+  const credential=await createUserWithEmailAndPassword(auth,email,password);
+  accountCreated=true;
+  const user=credential.user;
+  // Only initial registration data; never activate a plan or credit a commission here.
+  await setDoc(doc(db,'customers',user.uid),{
+   name,mobile,email:user.email,referralCode:'',referredBy,
+   subscriptionStatus:'inactive',createdAt:serverTimestamp()
   });
-  await signOut(auth);form.reset();status.className='ok';status.textContent='Customer ID बन गई है। Subscription अभी inactive है। Payment Confirm होने के बाद Admin Plan चालू करेगा।';
- }catch(err){status.className='error';status.textContent='Registration पूरा नहीं हुआ: '+(err.code||err.message)+'. यदि ईमेल अकाउंट बन चुका है, दोबारा रजिस्टर करने के बजाय सहायता लें।';}
- finally{submit.disabled=false;}
+  await signOut(auth);
+  form.reset();status.className='ok';
+  status.textContent='Customer ID बन गई है। Subscription inactive है। Payment और Referral की पुष्टि के बाद ही Admin आगे की प्रक्रिया करेगा।';
+ }catch(err){
+  status.className='error';
+  status.textContent=accountCreated
+   ? 'Login अकाउंट बन गया है, लेकिन Customer Profile सेव नहीं हुई: '+(err.code||err.message)+'। दोबारा Register न करें; Admin से सहायता लें।'
+   : 'Registration विफल: '+(err.code||err.message);
+ }finally{submit.disabled=false;}
 });
-</script></body></html>
+</script>
+</body>
+</html>
