@@ -4,7 +4,7 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDGxWy58rwbPYp1pyl4E-By-k7V86mBsI",
+  apiKey: "AIzaSyDGXWy58rwbPYrp1pyT4E-BY-k7V80mBsI",
   authDomain: "mirzapur-home-service.firebaseapp.com",
   projectId: "mirzapur-home-service",
   storageBucket: "mirzapur-home-service.firebasestorage.app",
