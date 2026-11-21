@@ -4,12 +4,13 @@ import { getAuth } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth
 import { getFirestore } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "PASTE_YOUR_API_KEY",
+  apiKey: "AIzaSyDGxWy58rwbPYp1pyl4E-By-k7V86mBsI",
   authDomain: "mirzapur-home-service.firebaseapp.com",
   projectId: "mirzapur-home-service",
   storageBucket: "mirzapur-home-service.firebasestorage.app",
-  messagingSenderId: "PASTE_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  messagingSenderId: "1016787889015",
+  appId: "1:1016787889015:web:c98e6d2d05f1739797cf72",
+  measurementId: "G-CN05SM258B"
 };
 
 export const app = initializeApp(firebaseConfig);
