@@ -1,1 +1,152 @@
-<!doctype html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin | Mirzapur Home Service</title><style>body{font:16px system-ui,Arial;background:#f6f3ff;color:#26143d;margin:0}header{background:#5a209d;color:white;padding:22px;text-align:center}main{max-width:750px;margin:25px auto;padding:15px}.card{background:white;border-radius:15px;padding:22px;box-shadow:0 3px 14px #e1d6f0;margin-bottom:15px}input{display:block;width:95%;padding:12px;margin:10px 0;border:1px solid #bbb;border-radius:8px}button{background:#6025ab;color:white;border:0;border-radius:8px;padding:12px;cursor:pointer}.hide{display:none}#status{white-space:pre-wrap}</style></head><body><header><h2>Mirzapur Home Service</h2><p>Secure Admin Login</p></header><main><div class="card" id="loginPanel"><h3>Admin Login</h3><form id="form"><input id="email" type="email" placeholder="Admin Email" required><input id="password" type="password" placeholder="Password" required><button>Login</button></form></div><div class="card hide" id="dashboard"><h3>Admin Dashboard</h3><p>आपकी Admin पहचान Firestore में सत्यापित है।</p><p>Customer Accounts, Payments, Referral Credit और Plan Activation के सुरक्षित प्रबंधन का मॉड्यूल अगले चरण में जोड़ा जाएगा।</p><p><strong>अभी कोई Payment Approve या Wallet Credit बटन सक्रिय नहीं है।</strong></p><button id="logout">Logout</button></div><div class="card" id="status">Admin Login करें।</div></main><script type="module">import{auth,db}from'./firebase-config.js';import{signInWithEmailAndPassword,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';import{doc,getDoc}from'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';const $=id=>document.getElementById(id);$('form').onsubmit=async e=>{e.preventDefault();try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}catch(err){$('status').textContent='Login विफल: '+err.message}};$('logout').onclick=()=>signOut(auth);onAuthStateChanged(auth,async user=>{$('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide');if(!user){$('status').textContent='Admin Login करें।';return}try{const snap=await getDoc(doc(db,'admins',user.uid));if(!snap.exists()||snap.data().active!==true){$('status').textContent='इस अकाउंट को Admin अनुमति नहीं मिली है।';await signOut(auth);return}$('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide');$('status').textContent='Admin Verified';}catch(err){$('status').textContent='Admin Verification Failed: '+err.message;await signOut(auth)}});</script></body></html>
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin | Mirzapur Home Service</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f6f2ff;color:#28143f}
+header{background:#59209d;color:white;text-align:center;padding:32px 12px}
+header h1{font-size:27px;margin:10px 0}
+header p{margin:8px}
+main{max-width:650px;margin:35px auto;padding:15px}
+.card{background:white;padding:25px;border-radius:18px;margin-bottom:20px;box-shadow:0 4px 16px #ddd2ed}
+input{width:100%;padding:15px;margin:10px 0;border:1px solid #bbb;border-radius:9px;font-size:16px}
+button{background:#6225ab;color:white;border:0;padding:14px 25px;border-radius:9px;font-size:16px;cursor:pointer}
+button:disabled{opacity:.6}
+.hide{display:none}
+#status{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6}
+.success{color:green}
+.error{color:#c62828}
+</style>
+</head>
+<body>
+
+<header>
+<h1>Mirzapur Home Service</h1>
+<p>Secure Admin Login</p>
+</header>
+
+<main>
+<div class="card" id="loginPanel">
+<h2>Admin Login</h2>
+<form id="loginForm">
+<input type="email" id="email" placeholder="Admin Email" required>
+<input type="password" id="password" placeholder="Password" required>
+<button type="submit" id="loginBtn">Login</button>
+</form>
+</div>
+
+<div class="card hide" id="dashboard">
+<h2>Admin Dashboard</h2>
+<p class="success">Admin Login Successful!</p>
+<p>आपकी Admin पहचान सत्यापित हो गई है।</p>
+<p>Customer Management, Payment Approval, Subscription और Referral System अगले चरण में जोड़े जाएँगे।</p>
+<button id="logoutBtn">Logout</button>
+</div>
+
+<div class="card">
+<h3>System Status</h3>
+<div id="status" role="status" aria-live="polite">JavaScript शुरू हो रहा है...</div>
+</div>
+</main>
+
+<script>
+const statusBox=document.getElementById("status");
+const loginBtn=document.getElementById("loginBtn");
+
+function showStatus(message,error=false){
+ statusBox.textContent=message;
+ statusBox.className=error?"error":"";
+}
+
+window.addEventListener("error",function(e){
+ showStatus("JavaScript Error: "+e.message,true);
+});
+
+window.addEventListener("unhandledrejection",function(e){
+ showStatus("System Error: "+String(e.reason),true);
+});
+</script>
+
+<script type="module">
+const $=id=>document.getElementById(id);
+
+try {
+ showStatus("Firebase से कनेक्ट हो रहा है...");
+
+ const {auth,db}=await import("./firebase-config.js");
+
+ const {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+ }=await import("https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js");
+
+ const {doc,getDoc}=await import("https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js");
+
+ showStatus("Firebase Connected. Admin Login करें।");
+
+ let busy=false;
+
+ $("loginForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  if(busy)return;
+  busy=true;
+  loginBtn.disabled=true;
+  showStatus("Login प्रक्रिया शुरू हो गई है...");
+
+  try{
+   const email=$("email").value.trim();
+   const password=$("password").value;
+
+   showStatus("Firebase Authentication जाँच रहा है...");
+
+   const result=await signInWithEmailAndPassword(auth,email,password);
+
+   showStatus("Login सफल। Admin Permission जाँच रहे हैं...");
+
+   const snapshot=await getDoc(doc(db,"admins",result.user.uid));
+
+   if(!snapshot.exists() || snapshot.data().active!==true){
+    showStatus("Login सफल, लेकिन Admin Permission नहीं मिली। Firestore में Admin UID और active=true सेट करना होगा।",true);
+    await signOut(auth);
+    return;
+   }
+
+   $("loginPanel").classList.add("hide");
+   $("dashboard").classList.remove("hide");
+   $("password").value="";
+   showStatus("Admin Verified Successfully!");
+
+  }catch(error){
+   showStatus("Login Error: "+error.code+"\n"+error.message,true);
+  }finally{
+   busy=false;
+   loginBtn.disabled=false;
+  }
+ });
+
+ $("logoutBtn").addEventListener("click",async()=>{
+  await signOut(auth);
+  $("dashboard").classList.add("hide");
+  $("loginPanel").classList.remove("hide");
+  showStatus("Logout सफल।");
+ });
+
+ onAuthStateChanged(auth,user=>{
+  if(!user){
+   $("dashboard").classList.add("hide");
+   $("loginPanel").classList.remove("hide");
+  }
+ });
+
+}catch(error){
+ showStatus("Firebase Load Error: "+(error.message||String(error)),true);
+}
+</script>
+
+</body>
+</html>
