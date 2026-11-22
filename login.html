@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Customer Login | Mirzapur Home Service</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f3ff;color:#29173f;font:16px system-ui,Arial}header{background:#59239c;color:white;text-align:center;padding:23px 12px}main{max-width:540px;margin:24px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{padding:12px 18px;background:#6228a8;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer;margin-top:14px}button:disabled{opacity:.6}.hide{display:none}.muted{color:#665b72;font-size:14px}.error{color:#b42318}.ok{color:#167337}#status{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:15px}a{color:#59239c}.line{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.line strong{display:block;margin-bottom:3px}
+</style>
+</head>
+<body>
+<header><h1>🏠 Mirzapur Home Service</h1><p>Customer Login & My Account</p></header>
+<main>
+<section class="card" id="loginPanel">
+<h2>Customer Login</h2>
+<form id="loginForm"><label for="email">ईमेल</label><input type="email" id="email" autocomplete="email" required><label for="password">पासवर्ड</label><input type="password" id="password" autocomplete="current-password" required><button id="loginButton" type="submit">Login</button></form>
+<p class="muted">नई Customer ID चाहिए? <a href="register.html">Registration करें</a></p>
+</section>
+<section class="card hide" id="accountPanel">
+<h2>My Account</h2><div id="accountDetails"></div><p class="muted">Payment Verification और Plan Activation अभी उपलब्ध नहीं हैं।</p><button id="logoutButton" type="button">Logout</button>
+</section>
+<section class="card"><div id="status" role="status" aria-live="polite">Login की स्थिति जाँच रहे हैं...</div><p><a href="index.html">← Home Page</a></p></section>
+</main>
+<script type="module">
+import {auth,db} from './firebase-config.js';
+import {signInWithEmailAndPassword,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+import {doc,getDoc} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+const $=id=>document.getElementById(id);
+const status=$('status');
+function message(value,error=false){status.className=error?'error':'ok';status.textContent=value}
+function field(label,value){const div=document.createElement('div');div.className='line';const heading=document.createElement('strong');heading.textContent=label;const span=document.createElement('span');span.textContent=String(value??'—');div.append(heading,span);$('accountDetails').append(div)}
+let generation=0;
+onAuthStateChanged(auth,async user=>{
+ const current=++generation;
+ $('accountPanel').classList.add('hide');$('loginPanel').classList.remove('hide');$('accountDetails').replaceChildren();
+ if(!user){message('ईमेल और पासवर्ड से Login करें।');return}
+ message('Customer Profile लोड हो रही है...');
+ try{
+  const snap=await getDoc(doc(db,'customers',user.uid));
+  if(current!==generation)return;
+  if(!snap.exists()){message('इस Login के लिए Customer Profile नहीं मिली। यदि आपने पहले Registration किया है तो Admin से संपर्क करें।',true);return}
+  const d=snap.data();
+  field('नाम',d.name);field('मोबाइल',d.mobile||d.phone);field('ईमेल',d.email);
+  field('Subscription Status',d.subscriptionStatus||'inactive');
+  field('Referral Code',d.referralCode||'अभी जारी नहीं हुआ');
+  field('Used Referral',d.referredBy||d.referralCodeUsed||'—');
+  $('loginPanel').classList.add('hide');$('accountPanel').classList.remove('hide');
+  message('Customer Login सफल है।');
+ }catch(err){if(current===generation)message('Profile नहीं खुली: '+(err.code||err.message),true)}
+},err=>message('Login की स्थिति नहीं मिल सकी: '+(err.code||err.message),true));
+$('loginForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('loginButton').disabled=true;message('Login जारी है...');
+ try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}
+ catch(err){message('Login विफल: '+(err.code||err.message),true)}
+ finally{$('loginButton').disabled=false}
+});
+$('logoutButton').addEventListener('click',async()=>{try{await signOut(auth)}catch(err){message('Logout विफल: '+(err.code||err.message),true)}});
+</script>
+</body></html>
