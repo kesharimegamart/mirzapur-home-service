@@ -28,6 +28,8 @@
  .banner{min-height:150px;padding:16px}.banner h2{font-size:20px}.banner p{font-size:12px}
  footer{padding:20px 12px;font-size:13px}
 }
+
+.session-chip{display:inline-flex;align-items:center;gap:7px;background:#efe5ff;color:#451779;border-radius:22px;padding:7px 12px;font-weight:700;font-size:13px}.session-chip[hidden]{display:none}.account-welcome{margin:12px 0;padding:14px;background:#f3edfc;border-radius:12px}.account-welcome[hidden]{display:none}
 </style>
 </head>
 <body>
@@ -35,8 +37,8 @@
 <h1>🏠 Mirzapur Home Service</h1>
 <p>आपकी पसंद की दुकान से सामान, आपके घर तक</p>
 </header>
-<nav><a href="#home">Home</a><a href="#services">Services</a><a href="#plans">Plans</a><a href="login.html">Customer Login</a><a href="register.html">Register</a><a href="#referral">Referral</a></nav>
-<div class="hero" id="home"><h2>आपकी पसंद की दुकान से सामान, सीधे आपके घर तक</h2><p>मिर्जापुर में किराना, घरेलू सामान और रोज़मर्रा की खरीदारी के लिए अपनी पसंद की दुकान बताइए। हम सामान खरीदकर आपके घर तक पहुँचाने में मदद करेंगे।</p><div class="hero-actions"><a class="btn" href="#plans">Subscription Plans देखें</a><a class="btn light" href="login.html">Customer Login</a><a class="btn light" href="register.html">नई Customer ID बनाएँ</a></div></div>
+<nav><a href="#home">Home</a><a href="#services">Services</a><a href="#plans">Plans</a><a id="navAccount" href="login.html">Customer Login</a><a href="register.html">Register</a><a href="#referral">Referral</a></nav>
+<div class="hero" id="home"><h2>आपकी पसंद की दुकान से सामान, सीधे आपके घर तक</h2><p>मिर्जापुर में किराना, घरेलू सामान और रोज़मर्रा की खरीदारी के लिए अपनी पसंद की दुकान बताइए। हम सामान खरीदकर आपके घर तक पहुँचाने में मदद करेंगे।</p><div class="hero-actions"><a class="btn" href="#plans">Subscription Plans देखें</a><a class="btn light" id="heroAccount" href="login.html">Customer Login</a><a class="btn light" href="register.html">नई Customer ID बनाएँ</a></div></div>
 <section id="services"><h2>हमारी Home Services</h2><p class="section-intro">आप अपनी शॉपिंग लिस्ट और दुकान की जानकारी भेजें। उपलब्धता और ऑर्डर प्रक्रिया की पुष्टि के बाद सेवा दी जाएगी।</p><div class="features"><article class="feature"><img loading="lazy" src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=850&q=80" alt="किराना और ताज़ा सामान की दुकान"><div class="feature-content"><h3>🛒 Grocery Shopping</h3><p>किराना और रोज़मर्रा का सामान आपकी पसंद की दुकान से।</p></div></article><article class="feature"><img loading="lazy" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=850&q=80" alt="दुकान से खरीदारी और भुगतान"><div class="feature-content"><h3>🏬 अपनी पसंद की दुकान</h3><p>मिर्जापुर में जिस दुकान से सामान चाहिए, उसका नाम बताइए।</p></div></article><article class="feature"><img loading="lazy" src="https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=850&q=80" alt="घर तक पार्सल डिलीवरी"><div class="feature-content"><h3>🚚 Doorstep Delivery</h3><p>खरीदारी के बाद सामान घर तक पहुँचाने में सहायता।</p></div></article></div></section>
 <section id="plans">
 <h2>हमारे Subscription Plans</h2>
@@ -76,7 +78,7 @@
 यहां ग्राहक अपना Subscription, बची हुई सर्विस,
 रिन्यूअल और सर्विस हिस्ट्री देख सकेंगे।
 <p>नई ID बनाने के लिए नीचे क्लिक करें। Login करके अपना उपलब्ध Customer Profile देख सकते हैं। अन्य Dashboard सुविधाएँ अगले चरण में जुड़ेंगी।</p>
-<div class="account-actions"><a class="btn" href="login.html">Customer Login</a><a class="btn" href="register.html">Customer Registration</a></div>
+<div id="homeSignedIn" class="account-welcome" hidden>आप Login हैं। Home Page और Profile के बीच जाने से Logout नहीं होगा।</div><div class="account-actions"><a class="btn" id="accountAction" href="login.html">Customer Login</a><a class="btn" href="register.html">Customer Registration</a></div>
 <p><strong>ध्यान दें:</strong> Registration से Subscription सक्रिय नहीं होता। भुगतान की पुष्टि के बाद ही Admin Plan शुरू करेगा। Validity समाप्त होने पर सेवा बंद रहेगी।</p>
 </div>
 </section>
@@ -126,13 +128,18 @@ function renderPlans(plans) {
     const price = document.createElement('div'); price.className = 'price'; price.textContent = money(p.price);
     const details = document.createElement('p');
     details.append(document.createTextNode(p.days + ' दिन की वैधता'),document.createElement('br'),document.createTextNode(p.services + ' सर्विस'));
-    const link = document.createElement('a'); link.className = 'btn'; link.href = 'register.html?plan=' + encodeURIComponent(fallback.id); link.textContent = 'Register for Plan';
+    const link = document.createElement('a'); link.className = 'btn'; link.href = 'login.html?plan=' + encodeURIComponent(fallback.id); link.textContent = 'Choose Plan';
     card.append(title,price,details,link); root.append(card);
   }
 }
 renderPlans(fallbackPlans);
 try {
-  const {db} = await import('./firebase-config.js');
+  const {db,auth} = await import('./firebase-config.js');
+   const {onAuthStateChanged} = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+   onAuthStateChanged(auth,user=>{
+     for(const id of ['navAccount','heroAccount','accountAction']){const a=document.getElementById(id);a.textContent=user?'👤 My Profile':'Customer Login';}
+     document.getElementById('homeSignedIn').hidden=!user;
+   });
   const {doc,getDoc} = await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
   const snapshot = await getDoc(doc(db,'businessSettings','public'));
   if(snapshot.exists()) {
