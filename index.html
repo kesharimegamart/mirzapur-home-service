@@ -7,6 +7,27 @@
 <title>Mirzapur Home Service</title>
 <style>
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,Arial,sans-serif;background:#f7f5fc;color:#29243a}header{background:linear-gradient(110deg,#451779,#7836bc);color:white;padding:20px 16px;text-align:center}header h1{margin:0;font-size:clamp(23px,4vw,34px)}header p{margin:8px 0 0;font-size:14px}nav{background:#35115f;padding:13px 10px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:sticky;top:0;z-index:10}nav a{color:white;text-decoration:none;font-size:14px;font-weight:600}nav a:hover{text-decoration:underline}.hero{position:relative;isolation:isolate;min-height:410px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:65px 20px;color:#fff;background:#332044}.hero:before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(35,15,62,.90),rgba(45,19,71,.58)),url('https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat}.hero h2{font-size:clamp(28px,5vw,44px);max-width:740px;margin:0 0 12px;color:#fff;line-height:1.25}.hero p{font-size:clamp(16px,2.5vw,19px);line-height:1.8;max-width:700px}.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}.btn{display:inline-block;background:#7130bd;color:white;padding:12px 18px;border-radius:10px;text-decoration:none;border:0;cursor:pointer;font-weight:650;font-size:14px}.btn:hover{background:#552095}.btn.light{background:#fff;color:#54218c}.btn.light:hover{background:#eee6f8}section{padding:32px 16px;max-width:1100px;margin:auto}h2{text-align:center;color:#54208f;font-size:clamp(23px,3vw,30px)}.section-intro{text-align:center;color:#655d70;line-height:1.7;margin:-5px auto 24px;max-width:650px}.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}.feature{background:white;border-radius:17px;overflow:hidden;box-shadow:0 5px 22px #ded5ea}.feature img{display:block;width:100%;height:175px;object-fit:cover;background:#e6ddf1}.feature-content{padding:18px}.feature h3{margin:0 0 8px;color:#432064}.feature p{margin:0;line-height:1.65;color:#61586c;font-size:14px}.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px}.card{background:white;padding:25px 18px;border-radius:17px;text-align:center;box-shadow:0 4px 18px #ddd6ed;border:1px solid #eee8f6}.card h3{margin:5px 0 14px}.price{font-size:30px;color:#6224b5;font-weight:bold;margin:12px}.card p{line-height:1.7}.info{background:white;border-radius:16px;padding:24px;line-height:1.9;box-shadow:0 4px 18px #e6deee}.account-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.banner{border-radius:18px;overflow:hidden;position:relative;min-height:230px;display:flex;align-items:center;padding:30px;color:white;background:linear-gradient(90deg,rgba(42,20,67,.94),rgba(64,30,95,.42)),url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1400&q=80') center/cover}.banner h2{color:white;text-align:left;margin:0 0 8px}.banner p{max-width:560px;line-height:1.7}footer{background:#2d1649;color:white;text-align:center;padding:28px 16px;margin-top:30px}small{color:#d5c9e8}.load-note{font-size:13px;color:#655b70;text-align:center;margin:12px auto;max-width:900px}@media(max-width:600px){nav{gap:12px}nav a{font-size:12px}.hero{min-height:390px;padding:55px 18px}.hero-actions .btn{width:100%;max-width:300px}section{padding:25px 14px}.features{grid-template-columns:1fr}.feature img{height:185px}.banner{padding:24px;min-height:210px}}
+
+/* Compact mobile layout: four subscription plans in one row */
+@media(max-width:600px){
+ header{padding:14px 10px}header h1{font-size:21px}header p{font-size:11px}
+ nav{display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:12px;overflow-x:auto;white-space:nowrap;padding:11px 12px;scrollbar-width:thin}
+ nav a{font-size:12px;flex-shrink:0}
+ .hero{min-height:310px;padding:32px 15px}.hero h2{font-size:25px}.hero p{font-size:14px;line-height:1.55}
+ .hero-actions{gap:7px}.hero-actions .btn{width:auto;max-width:none;flex:1 1 30%;min-width:90px;padding:10px 6px;font-size:11px;line-height:1.35}
+ section{padding:22px 10px}h2{font-size:22px}.section-intro{font-size:13px;margin-bottom:15px}
+ .features{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ .feature{border-radius:11px}.feature img{height:90px}.feature-content{padding:9px 7px}.feature h3{font-size:11px;line-height:1.3}.feature p{font-size:10px;line-height:1.4}
+ .plans{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+ .plans .card{min-width:0;padding:12px 3px;border-radius:10px;box-shadow:0 2px 8px #ddd6ed}
+ .plans .card h3{font-size:10px;line-height:1.3;min-height:26px;margin:0 0 6px}
+ .plans .price{font-size:clamp(12px,3.3vw,17px);margin:5px 0;font-weight:800;white-space:nowrap;letter-spacing:-.5px}
+ .plans .card p{font-size:10px;line-height:1.4;margin:7px 0;min-height:31px}
+ .plans .btn{font-size:9px;padding:8px 3px;border-radius:7px;width:100%;line-height:1.2}
+ .info{padding:15px;font-size:13px;line-height:1.65}
+ .banner{min-height:150px;padding:16px}.banner h2{font-size:20px}.banner p{font-size:12px}
+ footer{padding:20px 12px;font-size:13px}
+}
 </style>
 </head>
 <body>
