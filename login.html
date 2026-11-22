@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Customer Login | Mirzapur Home Service</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f3ff;color:#29173f;font:16px system-ui,Arial}header{background:#59239c;color:white;text-align:center;padding:23px 12px}main{max-width:540px;margin:24px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{padding:12px 18px;background:#6228a8;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer;margin-top:14px}button:disabled{opacity:.6}.hide{display:none}.muted{color:#665b72;font-size:14px}.error{color:#b42318}.ok{color:#167337}#status{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:15px}a{color:#59239c}.line{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.line strong{display:block;margin-bottom:3px}
+*{box-sizing:border-box}body{margin:0;background:#f6f3ff;color:#29173f;font:16px system-ui,Arial}header{background:#59239c;color:white;text-align:center;padding:23px 12px}main{max-width:540px;margin:24px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{padding:12px 18px;background:#6228a8;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer;margin-top:14px}button:disabled{opacity:.6}.hide{display:none!important}.muted{color:#665b72;font-size:14px}.error{color:#b42318}.ok{color:#167337}#status{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:15px}a{color:#59239c}.line{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.line strong{display:block;margin-bottom:3px}.linkbutton{background:none;border:0;color:#59239c;text-decoration:underline;padding:0;margin:12px 0 0;font-size:14px}.secondary{background:#e9dff6;color:#3d176d}.hint{font-size:13px;color:#665b72}
 </style>
 </head>
 <body>
@@ -12,47 +12,103 @@
 <main>
 <section class="card" id="loginPanel">
 <h2>Customer Login</h2>
-<form id="loginForm"><label for="email">ईमेल</label><input type="email" id="email" autocomplete="email" required><label for="password">पासवर्ड</label><input type="password" id="password" autocomplete="current-password" required><button id="loginButton" type="submit">Login</button></form>
+<form id="loginForm">
+<label for="email">ईमेल</label><input type="email" id="email" autocomplete="email" required>
+<label for="password">पासवर्ड</label><input type="password" id="password" autocomplete="current-password" required>
+<button id="loginButton" type="submit">Login</button>
+</form>
+<button class="linkbutton" id="showReset" type="button">Forgot Password?</button>
 <p class="muted">नई Customer ID चाहिए? <a href="register.html">Registration करें</a></p>
 </section>
+<section class="card hide" id="resetPanel">
+<h2>Forgot Password</h2><p class="muted">अपने रजिस्टर्ड ईमेल पर Password Reset Link प्राप्त करें।</p>
+<form id="resetForm"><label for="resetEmail">रजिस्टर्ड ईमेल</label><input id="resetEmail" type="email" autocomplete="email" required><button id="resetButton" type="submit">Send Reset Link</button></form>
+<button id="backLogin" type="button" class="secondary">Back to Login</button>
+</section>
 <section class="card hide" id="accountPanel">
-<h2>My Account</h2><div id="accountDetails"></div><p class="muted">Payment Verification और Plan Activation अभी उपलब्ध नहीं हैं।</p><button id="logoutButton" type="button">Logout</button>
+<h2>My Account</h2><div id="accountDetails"></div>
+<p class="muted">Payment Verification और Plan Activation अभी उपलब्ध नहीं हैं।</p>
+<button id="showChange" type="button">Change Password</button> <button id="logoutButton" type="button" class="secondary">Logout</button>
+</section>
+<section class="card hide" id="changePanel">
+<h2>Change Password</h2>
+<form id="changeForm">
+<label for="oldPassword">पुराना पासवर्ड</label><input id="oldPassword" type="password" autocomplete="current-password" required>
+<label for="newPassword">नया पासवर्ड</label><input id="newPassword" type="password" autocomplete="new-password" minlength="6" required>
+<label for="confirmPassword">नया पासवर्ड दोबारा</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" required>
+<p class="hint">कम से कम 6 अक्षर रखें। मजबूत पासवर्ड का उपयोग करें।</p>
+<button id="changeButton" type="submit">Update Password</button>
+</form><button id="cancelChange" type="button" class="secondary">Cancel</button>
 </section>
 <section class="card"><div id="status" role="status" aria-live="polite">Login की स्थिति जाँच रहे हैं...</div><p><a href="index.html">← Home Page</a></p></section>
 </main>
 <script type="module">
 import {auth,db} from './firebase-config.js';
-import {signInWithEmailAndPassword,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
+import {signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,EmailAuthProvider,reauthenticateWithCredential,updatePassword} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
 import {doc,getDoc} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
 const $=id=>document.getElementById(id);
 const status=$('status');
 function message(value,error=false){status.className=error?'error':'ok';status.textContent=value}
 function field(label,value){const div=document.createElement('div');div.className='line';const heading=document.createElement('strong');heading.textContent=label;const span=document.createElement('span');span.textContent=String(value??'—');div.append(heading,span);$('accountDetails').append(div)}
+function show(...ids){for(const id of ['loginPanel','resetPanel','accountPanel','changePanel'])$(id).classList.toggle('hide',!ids.includes(id))}
+function friendly(err){const code=err?.code||'';const messages={
+'auth/network-request-failed':'Firebase से कनेक्शन नहीं बन पाया। इंटरनेट बदलकर या थोड़ी देर बाद कोशिश करें।',
+'auth/invalid-credential':'ईमेल या पासवर्ड सही नहीं है।',
+'auth/invalid-email':'सही ईमेल दर्ज करें।',
+'auth/too-many-requests':'बहुत प्रयास हुए हैं। कुछ समय बाद कोशिश करें।',
+'auth/weak-password':'नया पासवर्ड कमजोर है। मजबूत पासवर्ड रखें।',
+'auth/requires-recent-login':'सुरक्षा के लिए दोबारा Login करके प्रयास करें।',
+'auth/wrong-password':'पुराना पासवर्ड गलत है।',
+'auth/user-disabled':'यह अकाउंट बंद है। सहायता के लिए Admin से संपर्क करें।'
+};return messages[code]||(code||err?.message||'अज्ञात समस्या')}
 let generation=0;
 onAuthStateChanged(auth,async user=>{
  const current=++generation;
- $('accountPanel').classList.add('hide');$('loginPanel').classList.remove('hide');$('accountDetails').replaceChildren();
- if(!user){message('ईमेल और पासवर्ड से Login करें।');return}
- message('Customer Profile लोड हो रही है...');
+ $('accountDetails').replaceChildren();$('changeForm').reset();
+ if(!user){show('loginPanel');message('ईमेल और पासवर्ड से Login करें।');return}
+ show('accountPanel');message('Customer Profile लोड हो रही है...');
  try{
   const snap=await getDoc(doc(db,'customers',user.uid));
   if(current!==generation)return;
-  if(!snap.exists()){message('इस Login के लिए Customer Profile नहीं मिली। यदि आपने पहले Registration किया है तो Admin से संपर्क करें।',true);return}
+  if(!snap.exists()){field('ईमेल',user.email);message('इस Login के लिए Customer Profile नहीं मिली। Admin से संपर्क करें।',true);return}
   const d=snap.data();
   field('नाम',d.name);field('मोबाइल',d.mobile||d.phone);field('ईमेल',d.email);
   field('Subscription Status',d.subscriptionStatus||'inactive');
   field('Referral Code',d.referralCode||'अभी जारी नहीं हुआ');
   field('Used Referral',d.referredBy||d.referralCodeUsed||'—');
-  $('loginPanel').classList.add('hide');$('accountPanel').classList.remove('hide');
   message('Customer Login सफल है।');
- }catch(err){if(current===generation)message('Profile नहीं खुली: '+(err.code||err.message),true)}
-},err=>message('Login की स्थिति नहीं मिल सकी: '+(err.code||err.message),true));
+ }catch(err){if(current===generation)message('Profile नहीं खुली: '+friendly(err),true)}
+},err=>message('Login की स्थिति नहीं मिल सकी: '+friendly(err),true));
 $('loginForm').addEventListener('submit',async e=>{
  e.preventDefault();$('loginButton').disabled=true;message('Login जारी है...');
- try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}
- catch(err){message('Login विफल: '+(err.code||err.message),true)}
+ try{await signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value);$('password').value=''}
+ catch(err){message('Login विफल: '+friendly(err),true)}
  finally{$('loginButton').disabled=false}
 });
-$('logoutButton').addEventListener('click',async()=>{try{await signOut(auth)}catch(err){message('Logout विफल: '+(err.code||err.message),true)}});
+$('showReset').onclick=()=>{ $('resetEmail').value=$('email').value.trim();show('resetPanel');message('रजिस्टर्ड ईमेल भरकर Reset Link भेजें।')};
+$('backLogin').onclick=()=>{show('loginPanel');message('ईमेल और पासवर्ड से Login करें।')};
+$('resetForm').addEventListener('submit',async e=>{
+ e.preventDefault();$('resetButton').disabled=true;
+ try{await sendPasswordResetEmail(auth,$('resetEmail').value.trim());message('अगर इस ईमेल का अकाउंट मौजूद है, तो Password Reset Link भेज दिया गया है। Inbox और Spam दोनों जाँचें।')}
+ catch(err){message('Reset Link भेजने में समस्या: '+friendly(err),true)}
+ finally{$('resetButton').disabled=false}
+});
+$('showChange').onclick=()=>{if(!auth.currentUser)return;show('accountPanel','changePanel');message('पुराना पासवर्ड सत्यापित करके नया पासवर्ड सेट करें।')};
+$('cancelChange').onclick=()=>{$('changeForm').reset();show('accountPanel');message('पासवर्ड नहीं बदला गया।')};
+$('changeForm').addEventListener('submit',async e=>{
+ e.preventDefault();const user=auth.currentUser;
+ if(!user||!user.email){message('पहले ईमेल से Login करें।',true);return}
+ const old=$('oldPassword').value, next=$('newPassword').value, confirm=$('confirmPassword').value;
+ if(next!==confirm){message('नया पासवर्ड और Confirm Password अलग हैं।',true);return}
+ if(next===old){message('नया पासवर्ड पुराने से अलग रखें।',true);return}
+ $('changeButton').disabled=true;
+ try{
+  await reauthenticateWithCredential(user,EmailAuthProvider.credential(user.email,old));
+  await updatePassword(user,next);
+  $('changeForm').reset();show('accountPanel');message('पासवर्ड सफलतापूर्वक बदल गया है।')
+ }catch(err){message('पासवर्ड नहीं बदला: '+friendly(err),true)}
+ finally{$('changeButton').disabled=false}
+});
+$('logoutButton').addEventListener('click',async()=>{try{await signOut(auth)}catch(err){message('Logout विफल: '+friendly(err),true)}});
 </script>
 </body></html>
