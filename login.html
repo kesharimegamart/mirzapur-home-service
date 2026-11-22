@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Customer Login | Mirzapur Home Service</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f3ff;color:#29173f;font:16px system-ui,Arial}header{background:#59239c;color:white;text-align:center;padding:23px 12px}main{max-width:540px;margin:24px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{padding:12px 18px;background:#6228a8;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer;margin-top:14px}button:disabled{opacity:.6}.hide{display:none!important}.muted{color:#665b72;font-size:14px}.error{color:#b42318}.ok{color:#167337}#status{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:15px}a{color:#59239c}.line{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.line strong{display:block;margin-bottom:3px}.linkbutton{background:none;border:0;color:#59239c;text-decoration:underline;padding:0;margin:12px 0 0;font-size:14px}.secondary{background:#e9dff6;color:#3d176d}.hint{font-size:13px;color:#665b72}
+*{box-sizing:border-box}body{margin:0;background:#f6f3ff;color:#29173f;font:16px system-ui,Arial}header{background:#59239c;color:white;text-align:center;padding:23px 12px}main{max-width:540px;margin:24px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{padding:12px 18px;background:#6228a8;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer;margin-top:14px}button:disabled{opacity:.6}.hide{display:none!important}.muted{color:#665b72;font-size:14px}.error{color:#b42318}.ok{color:#167337}#status{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:15px}a{color:#59239c}.line{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.line strong{display:block;margin-bottom:3px}.linkbutton{background:none;border:0;color:#59239c;text-decoration:underline;padding:0;margin:12px 0 0;font-size:14px}.secondary{background:#e9dff6;color:#3d176d}.hint{font-size:13px;color:#665b72}.refbox{background:#f6f0ff;border:1px solid #e5d7fa;border-radius:12px;padding:14px;margin-top:16px}.refbox input{background:white;font-size:14px}.refactions{display:flex;flex-wrap:wrap;gap:8px}.refactions button{margin-top:8px}.refbox h3{margin:0 0 8px}
 </style>
 </head>
 <body>
@@ -26,7 +26,7 @@
 <button id="backLogin" type="button" class="secondary">Back to Login</button>
 </section>
 <section class="card hide" id="accountPanel">
-<h2>My Account</h2><div id="accountDetails"></div>
+<h2>My Account</h2><div id="accountDetails"></div><div id="referralPanel" class="refbox hide"><h3>🎁 Refer & Earn</h3><p class="muted">अपना Referral Code और लिंक दोस्तों को भेजें। कमीशन केवल सत्यापित भुगतान के बाद ही मिलेगा।</p><label for="myReferralCode">आपका Referral Code</label><input id="myReferralCode" readonly><label for="myReferralLink">आपका Referral Link</label><input id="myReferralLink" readonly><div class="refactions"><button id="copyReferral" type="button">Copy Link</button><button id="shareReferral" type="button" class="secondary">Share / WhatsApp</button></div></div>
 <p class="muted">Payment Verification और Plan Activation अभी उपलब्ध नहीं हैं।</p>
 <button id="showChange" type="button">Change Password</button> <button id="logoutButton" type="button" class="secondary">Logout</button>
 </section>
@@ -62,9 +62,24 @@ function friendly(err){const code=err?.code||'';const messages={
 'auth/user-disabled':'यह अकाउंट बंद है। सहायता के लिए Admin से संपर्क करें।'
 };return messages[code]||(code||err?.message||'अज्ञात समस्या')}
 let generation=0;
+let activeReferralLink='';
+async function copyText(value){
+ if(navigator.clipboard && window.isSecureContext){await navigator.clipboard.writeText(value);return}
+ const tmp=document.createElement('textarea');tmp.value=value;tmp.style.position='fixed';tmp.style.opacity='0';document.body.append(tmp);tmp.select();const success=document.execCommand('copy');tmp.remove();if(!success)throw Error('copy-failed');
+}
+$('copyReferral').onclick=async()=>{
+ if(!activeReferralLink)return;
+ try{await copyText(activeReferralLink);message('Referral Link कॉपी हो गया।')}
+ catch{message('लिंक कॉपी नहीं हुआ। ऊपर दिए लिंक को दबाकर कॉपी करें।',true)}
+};
+$('shareReferral').onclick=()=>{
+ if(!activeReferralLink)return;
+ const shareText='Mirzapur Home Service पर रजिस्टर करें। मेरा Referral Link: '+activeReferralLink;
+ window.open('https://wa.me/?text='+encodeURIComponent(shareText),'_blank','noopener,noreferrer');
+};
 onAuthStateChanged(auth,async user=>{
  const current=++generation;
- $('accountDetails').replaceChildren();$('changeForm').reset();
+ $('accountDetails').replaceChildren();$('changeForm').reset();$('referralPanel').classList.add('hide');activeReferralLink='';
  if(!user){show('loginPanel');message('ईमेल और पासवर्ड से Login करें।');return}
  show('accountPanel');message('Customer Profile लोड हो रही है...');
  try{
@@ -74,7 +89,16 @@ onAuthStateChanged(auth,async user=>{
   const d=snap.data();
   field('नाम',d.name);field('मोबाइल',d.mobile||d.phone);field('ईमेल',d.email);
   field('Subscription Status',d.subscriptionStatus||'inactive');
-  field('Referral Code',d.referralCode||'अभी जारी नहीं हुआ');
+  const code=typeof d.referralCode==='string'?d.referralCode.trim():'';
+  field('Referral Code',code||'अभी जारी नहीं हुआ');
+  if(code){
+   const url=new URL('register.html',window.location.href);
+   url.searchParams.set('ref',code);
+   activeReferralLink=url.href;
+   $('myReferralCode').value=code;
+   $('myReferralLink').value=activeReferralLink;
+   $('referralPanel').classList.remove('hide');
+  }
   field('Used Referral',d.referredBy||d.referralCodeUsed||'—');
   message('Customer Login सफल है।');
  }catch(err){if(current===generation)message('Profile नहीं खुली: '+friendly(err),true)}
