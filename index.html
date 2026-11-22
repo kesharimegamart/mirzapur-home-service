@@ -6,27 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mirzapur Home Service</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f6f3ff;color:#262238}
-header{background:#6224b5;color:white;padding:24px 16px;text-align:center}
-header h1{margin:0;font-size:27px}
-header p{margin:10px 0 0}
-nav{background:#4c198f;padding:13px;text-align:center}
-nav a{color:white;text-decoration:none;margin:0 9px;font-size:14px}
-.hero{text-align:center;padding:36px 18px}
-.hero h2{font-size:25px;color:#57209c}
-.hero p{line-height:1.6}
-.btn{display:inline-block;background:#6828ba;color:white;padding:13px 20px;border-radius:9px;text-decoration:none;border:0;cursor:pointer}
-section{padding:20px 15px;max-width:1000px;margin:auto}
-h2{text-align:center;color:#57209c}
-.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
-.card{background:white;padding:23px;border-radius:15px;text-align:center;box-shadow:0 3px 14px #ddd6ed}
-.price{font-size:30px;color:#6224b5;font-weight:bold;margin:12px}
-.card p{line-height:1.7}
-.info{background:white;border-radius:14px;padding:20px;line-height:1.9}
-footer{background:#2d1649;color:white;text-align:center;padding:23px;margin-top:30px}
-small{color:#d5c9e8}
-.load-note{font-size:13px;color:#655b70;text-align:center;margin:12px auto;max-width:900px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,Arial,sans-serif;background:#f7f5fc;color:#29243a}header{background:linear-gradient(110deg,#451779,#7836bc);color:white;padding:20px 16px;text-align:center}header h1{margin:0;font-size:clamp(23px,4vw,34px)}header p{margin:8px 0 0;font-size:14px}nav{background:#35115f;padding:13px 10px;display:flex;gap:16px;justify-content:center;flex-wrap:wrap;position:sticky;top:0;z-index:10}nav a{color:white;text-decoration:none;font-size:14px;font-weight:600}nav a:hover{text-decoration:underline}.hero{position:relative;isolation:isolate;min-height:410px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:65px 20px;color:#fff;background:#332044}.hero:before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(35,15,62,.90),rgba(45,19,71,.58)),url('https://images.unsplash.com/photo-1556911220-bff31c812dba?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat}.hero h2{font-size:clamp(28px,5vw,44px);max-width:740px;margin:0 0 12px;color:#fff;line-height:1.25}.hero p{font-size:clamp(16px,2.5vw,19px);line-height:1.8;max-width:700px}.hero-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:12px}.btn{display:inline-block;background:#7130bd;color:white;padding:12px 18px;border-radius:10px;text-decoration:none;border:0;cursor:pointer;font-weight:650;font-size:14px}.btn:hover{background:#552095}.btn.light{background:#fff;color:#54218c}.btn.light:hover{background:#eee6f8}section{padding:32px 16px;max-width:1100px;margin:auto}h2{text-align:center;color:#54208f;font-size:clamp(23px,3vw,30px)}.section-intro{text-align:center;color:#655d70;line-height:1.7;margin:-5px auto 24px;max-width:650px}.features{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px}.feature{background:white;border-radius:17px;overflow:hidden;box-shadow:0 5px 22px #ded5ea}.feature img{display:block;width:100%;height:175px;object-fit:cover;background:#e6ddf1}.feature-content{padding:18px}.feature h3{margin:0 0 8px;color:#432064}.feature p{margin:0;line-height:1.65;color:#61586c;font-size:14px}.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:16px}.card{background:white;padding:25px 18px;border-radius:17px;text-align:center;box-shadow:0 4px 18px #ddd6ed;border:1px solid #eee8f6}.card h3{margin:5px 0 14px}.price{font-size:30px;color:#6224b5;font-weight:bold;margin:12px}.card p{line-height:1.7}.info{background:white;border-radius:16px;padding:24px;line-height:1.9;box-shadow:0 4px 18px #e6deee}.account-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.banner{border-radius:18px;overflow:hidden;position:relative;min-height:230px;display:flex;align-items:center;padding:30px;color:white;background:linear-gradient(90deg,rgba(42,20,67,.94),rgba(64,30,95,.42)),url('https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1400&q=80') center/cover}.banner h2{color:white;text-align:left;margin:0 0 8px}.banner p{max-width:560px;line-height:1.7}footer{background:#2d1649;color:white;text-align:center;padding:28px 16px;margin-top:30px}small{color:#d5c9e8}.load-note{font-size:13px;color:#655b70;text-align:center;margin:12px auto;max-width:900px}@media(max-width:600px){nav{gap:12px}nav a{font-size:12px}.hero{min-height:390px;padding:55px 18px}.hero-actions .btn{width:100%;max-width:300px}section{padding:25px 14px}.features{grid-template-columns:1fr}.feature img{height:185px}.banner{padding:24px;min-height:210px}}
 </style>
 </head>
 <body>
@@ -34,20 +14,9 @@ small{color:#d5c9e8}
 <h1>🏠 Mirzapur Home Service</h1>
 <p>आपकी पसंद की दुकान से सामान, आपके घर तक</p>
 </header>
-<nav>
-<a href="#home">Home</a>
-<a href="#plans">Plans</a>
-<a href="#account">My Account</a>
-<a href="register.html">Register</a>
-<a href="#referral">Referral</a>
-</nav>
-<div class="hero" id="home">
-<h2>अब घर बैठे पाएं अपनी पसंद का सामान</h2>
-<p>मिर्जापुर में अपनी पसंद की दुकान बताएं।<br>
-हम आपके लिए सामान खरीदकर घर तक पहुंचाने में मदद करेंगे।</p>
-<a class="btn" href="#plans">View Subscription Plans</a>
-<a class="btn" href="register.html" style="background:#fff;color:#57209c;border:1px solid #57209c;margin:8px">नई Customer ID बनाएँ</a>
-</div>
+<nav><a href="#home">Home</a><a href="#services">Services</a><a href="#plans">Plans</a><a href="login.html">Customer Login</a><a href="register.html">Register</a><a href="#referral">Referral</a></nav>
+<div class="hero" id="home"><h2>आपकी पसंद की दुकान से सामान, सीधे आपके घर तक</h2><p>मिर्जापुर में किराना, घरेलू सामान और रोज़मर्रा की खरीदारी के लिए अपनी पसंद की दुकान बताइए। हम सामान खरीदकर आपके घर तक पहुँचाने में मदद करेंगे।</p><div class="hero-actions"><a class="btn" href="#plans">Subscription Plans देखें</a><a class="btn light" href="login.html">Customer Login</a><a class="btn light" href="register.html">नई Customer ID बनाएँ</a></div></div>
+<section id="services"><h2>हमारी Home Services</h2><p class="section-intro">आप अपनी शॉपिंग लिस्ट और दुकान की जानकारी भेजें। उपलब्धता और ऑर्डर प्रक्रिया की पुष्टि के बाद सेवा दी जाएगी।</p><div class="features"><article class="feature"><img loading="lazy" src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=850&q=80" alt="किराना और ताज़ा सामान की दुकान"><div class="feature-content"><h3>🛒 Grocery Shopping</h3><p>किराना और रोज़मर्रा का सामान आपकी पसंद की दुकान से।</p></div></article><article class="feature"><img loading="lazy" src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?auto=format&fit=crop&w=850&q=80" alt="दुकान से खरीदारी और भुगतान"><div class="feature-content"><h3>🏬 अपनी पसंद की दुकान</h3><p>मिर्जापुर में जिस दुकान से सामान चाहिए, उसका नाम बताइए।</p></div></article><article class="feature"><img loading="lazy" src="https://images.unsplash.com/photo-1526367790999-0150786686a2?auto=format&fit=crop&w=850&q=80" alt="घर तक पार्सल डिलीवरी"><div class="feature-content"><h3>🚚 Doorstep Delivery</h3><p>खरीदारी के बाद सामान घर तक पहुँचाने में सहायता।</p></div></article></div></section>
 <section id="plans">
 <h2>हमारे Subscription Plans</h2>
 <div class="plans" id="planCards">
@@ -85,8 +54,8 @@ small{color:#d5c9e8}
 <b>Customer Dashboard</b><br>
 यहां ग्राहक अपना Subscription, बची हुई सर्विस,
 रिन्यूअल और सर्विस हिस्ट्री देख सकेंगे।
-<p>नई ID बनाने के लिए नीचे क्लिक करें। Login और Dashboard अगले चरण में जोड़े जाएँगे।</p>
-<a class="btn" href="register.html">Customer Registration</a>
+<p>नई ID बनाने के लिए नीचे क्लिक करें। Login करके अपना उपलब्ध Customer Profile देख सकते हैं। अन्य Dashboard सुविधाएँ अगले चरण में जुड़ेंगी।</p>
+<div class="account-actions"><a class="btn" href="login.html">Customer Login</a><a class="btn" href="register.html">Customer Registration</a></div>
 <p><strong>ध्यान दें:</strong> Registration से Subscription सक्रिय नहीं होता। भुगतान की पुष्टि के बाद ही Admin Plan शुरू करेगा। Validity समाप्त होने पर सेवा बंद रहेगी।</p>
 </div>
 </section>
@@ -100,12 +69,12 @@ small{color:#d5c9e8}
 </div>
 </section>
 <section>
-<h2>WhatsApp Ordering</h2>
+<div class="banner"><div><h2>WhatsApp Ordering</h2>
 <div class="info" style="text-align:center">
 अपनी शॉपिंग लिस्ट, दुकान का नाम और डिलीवरी पता
 WhatsApp पर भेजें।
 <p>WhatsApp ऑर्डर बटन जल्द सक्रिय होगा।</p>
-</div>
+</div></div>
 </section>
 <footer>
 <b>Mirzapur Home Service</b>
