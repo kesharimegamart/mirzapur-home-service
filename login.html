@@ -5,6 +5,8 @@
 <title>Customer Login | Mirzapur Home Service</title>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#f6f3ff;color:#29173f;font:16px system-ui,Arial}header{background:#59239c;color:white;text-align:center;padding:23px 12px}main{max-width:540px;margin:24px auto;padding:0 15px}.card{background:white;border-radius:16px;padding:24px;margin-bottom:16px;box-shadow:0 4px 16px #ded4ed}label{display:block;margin:13px 0 5px;font-weight:600}input{width:100%;padding:13px;border:1px solid #bbb;border-radius:9px;font:inherit}button{padding:12px 18px;background:#6228a8;color:white;border:0;border-radius:9px;font:inherit;cursor:pointer;margin-top:14px}button:disabled{opacity:.6}.hide{display:none!important}.muted{color:#665b72;font-size:14px}.error{color:#b42318}.ok{color:#167337}#status{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:15px}a{color:#59239c}.line{border-bottom:1px solid #eee;padding:12px 0;overflow-wrap:anywhere}.line strong{display:block;margin-bottom:3px}.linkbutton{background:none;border:0;color:#59239c;text-decoration:underline;padding:0;margin:12px 0 0;font-size:14px}.secondary{background:#e9dff6;color:#3d176d}.hint{font-size:13px;color:#665b72}.refbox{background:#f6f0ff;border:1px solid #e5d7fa;border-radius:12px;padding:14px;margin-top:16px}.refbox input{background:white;font-size:14px}.refactions{display:flex;flex-wrap:wrap;gap:8px}.refactions button{margin-top:8px}.refbox h3{margin:0 0 8px}
+
+.dashboard-links{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.dashboard-links a{display:inline-block;background:#eee5fb;color:#4e1b84;padding:10px 12px;border-radius:9px;text-decoration:none;font-weight:650;font-size:14px}.dash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.dash-tile{padding:14px;border:1px solid #e6d9f4;border-radius:12px;background:#faf7ff}.dash-tile b{display:block;margin-bottom:7px}.dash-tile span{font-size:14px;overflow-wrap:anywhere}.dash-card{margin-top:14px;padding:15px;border:1px solid #e8dff1;border-radius:12px}.dash-card h3{margin:0 0 9px}.dash-card p{margin:6px 0;line-height:1.6}.payment-entry{padding:9px 0;border-bottom:1px solid #eee;font-size:14px}.payment-entry:last-child{border:0}.note{font-size:13px;color:#665b72;line-height:1.5}
 </style>
 </head>
 <body>
@@ -26,7 +28,11 @@
 <button id="backLogin" type="button" class="secondary">Back to Login</button>
 </section>
 <section class="card hide" id="accountPanel">
-<h2>My Account</h2><div id="accountDetails"></div><div id="referralPanel" class="refbox hide"><h3>🎁 Refer & Earn</h3><p class="muted">अपना Referral Code और लिंक दोस्तों को भेजें। कमीशन केवल सत्यापित भुगतान के बाद ही मिलेगा।</p><label for="myReferralCode">आपका Referral Code</label><input id="myReferralCode" readonly><label for="myReferralLink">आपका Referral Link</label><input id="myReferralLink" readonly><div class="refactions"><button id="copyReferral" type="button">Copy Link</button><button id="shareReferral" type="button" class="secondary">Share / WhatsApp</button></div></div>
+<h2>👤 My Profile</h2><div class="dashboard-links"><a href="index.html">🏠 Home</a><a href="index.html#plans">📋 Plans</a><a href="payment-request.html">💳 Payment Request</a></div><div id="accountDetails"></div>
+<div class="dash-grid"><div class="dash-tile"><b>Subscription</b><span id="subSummary">लोड हो रहा है...</span></div><div class="dash-tile"><b>बची सर्विस</b><span id="serviceSummary">लोड हो रहा है...</span></div><div class="dash-tile"><b>Wallet</b><span id="walletSummary">अभी उपलब्ध नहीं</span></div><div class="dash-tile"><b>Referral Earnings</b><span id="earningsSummary">अभी उपलब्ध नहीं</span></div></div>
+<div class="dash-card"><h3>📅 Plan & Validity</h3><p id="validitySummary">लोड हो रहा है...</p><a href="payment-request.html">Plan लें / Renewal Request भेजें</a><p class="note">Upgrade की शेष रकम का समायोजन सुरक्षित Approval सिस्टम तैयार होने पर लागू होगा।</p></div>
+<div class="dash-card"><h3>💳 Payment History</h3><div id="paymentHistory">लोड हो रही है...</div><p class="note">Pending Request भुगतान की पुष्टि नहीं है।</p></div>
+<div class="dash-card"><h3>🛍️ Service History</h3><p>Service Booking और इस्तेमाल की गई सर्विस का रिकॉर्ड अगले चरण में सक्रिय होगा।</p></div><div id="referralPanel" class="refbox hide"><h3>🎁 Refer & Earn</h3><p class="muted">अपना Referral Code और लिंक दोस्तों को भेजें। कमीशन केवल सत्यापित भुगतान के बाद ही मिलेगा।</p><label for="myReferralCode">आपका Referral Code</label><input id="myReferralCode" readonly><label for="myReferralLink">आपका Referral Link</label><input id="myReferralLink" readonly><div class="refactions"><button id="copyReferral" type="button">Copy Link</button><button id="shareReferral" type="button" class="secondary">Share / WhatsApp</button></div></div>
 <p class="muted">Payment Verification और Plan Activation अभी उपलब्ध नहीं हैं।</p>
 <button id="showChange" type="button">Change Password</button> <button id="logoutButton" type="button" class="secondary">Logout</button>
 </section>
@@ -45,7 +51,7 @@
 <script type="module">
 import {auth,db} from './firebase-config.js';
 import {signInWithEmailAndPassword,signOut,onAuthStateChanged,sendPasswordResetEmail,EmailAuthProvider,reauthenticateWithCredential,updatePassword} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js';
-import {doc,getDoc} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
+import {doc,getDoc,collection,query,where,getDocs} from 'https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js';
 const $=id=>document.getElementById(id);
 const status=$('status');
 function message(value,error=false){status.className=error?'error':'ok';status.textContent=value}
@@ -63,6 +69,23 @@ function friendly(err){const code=err?.code||'';const messages={
 };return messages[code]||(code||err?.message||'अज्ञात समस्या')}
 let generation=0;
 let activeReferralLink='';
+function showSubscription(d){
+ const end=d.subscriptionEndAt?.toDate?.();const active=d.subscriptionStatus==='active'&&end instanceof Date&&end.getTime()>Date.now();
+ $('subSummary').textContent=active?'Active':'Inactive / Expired';
+ $('serviceSummary').textContent=active&&Number.isInteger(d.remainingServices)?String(d.remainingServices):'कोई सक्रिय सर्विस नहीं';
+ $('validitySummary').textContent=active?`Plan: ${d.subscriptionPlanId||'—'} • समाप्ति: ${end.toLocaleDateString('hi-IN')}`:'अभी कोई सक्रिय Subscription नहीं है। केवल Payment Request भेजने से Plan शुरू नहीं होता।';
+ $('walletSummary').textContent='Ledger शुरू होने पर दिखेगा';$('earningsSummary').textContent='Verified Commission के बाद दिखेगा';
+}
+async function showPaymentHistory(uid,current){
+ const root=$('paymentHistory');root.textContent='Payment Requests लोड हो रही हैं...';
+ try{
+  const snap=await getDocs(query(collection(db,'paymentRequests'),where('customerUid','==',uid)));
+  if(current!==generation)return;
+  const entries=snap.docs.map(x=>x.data()).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));root.replaceChildren();
+  if(!entries.length){root.textContent='अभी कोई Payment Request नहीं है।';return}
+  for(const d of entries){const div=document.createElement('div');div.className='payment-entry';const date=d.createdAt?.toDate?.()?.toLocaleDateString('hi-IN')||'—';div.textContent=`${d.planName||d.planId||'Plan'} • ₹${d.amount??'—'} • ${d.status||'pending'} • ${date}`;root.append(div)}
+ }catch(e){if(current===generation)root.textContent='Payment History अभी नहीं खुल सकी: '+(e.code||e.message)}
+}
 async function copyText(value){
  if(navigator.clipboard && window.isSecureContext){await navigator.clipboard.writeText(value);return}
  const tmp=document.createElement('textarea');tmp.value=value;tmp.style.position='fixed';tmp.style.opacity='0';document.body.append(tmp);tmp.select();const success=document.execCommand('copy');tmp.remove();if(!success)throw Error('copy-failed');
@@ -79,7 +102,7 @@ $('shareReferral').onclick=()=>{
 };
 onAuthStateChanged(auth,async user=>{
  const current=++generation;
- $('accountDetails').replaceChildren();$('changeForm').reset();$('referralPanel').classList.add('hide');activeReferralLink='';
+ $('accountDetails').replaceChildren();$('paymentHistory').textContent='लोड हो रही है...';$('changeForm').reset();$('referralPanel').classList.add('hide');activeReferralLink='';
  if(!user){show('loginPanel');message('ईमेल और पासवर्ड से Login करें।');return}
  show('accountPanel');message('Customer Profile लोड हो रही है...');
  try{
@@ -88,7 +111,7 @@ onAuthStateChanged(auth,async user=>{
   if(!snap.exists()){field('ईमेल',user.email);message('इस Login के लिए Customer Profile नहीं मिली। Admin से संपर्क करें।',true);return}
   const d=snap.data();
   field('नाम',d.name);field('मोबाइल',d.mobile||d.phone);field('ईमेल',d.email);
-  field('Subscription Status',d.subscriptionStatus||'inactive');
+  field('Subscription Status',d.subscriptionStatus||'inactive');showSubscription(d);void showPaymentHistory(user.uid,current);
   const code=typeof d.referralCode==='string'?d.referralCode.trim():'';
   field('Referral Code',code||'अभी जारी नहीं हुआ');
   if(code){
