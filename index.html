@@ -11,8 +11,8 @@
 /* Compact mobile layout: four subscription plans in one row */
 @media(max-width:600px){
  header{padding:14px 10px}header h1{font-size:21px}header p{font-size:11px}
- nav{display:flex;flex-wrap:nowrap;justify-content:flex-start;gap:12px;overflow-x:auto;white-space:nowrap;padding:11px 12px;scrollbar-width:thin}
- nav a{font-size:12px;flex-shrink:0}
+ nav{display:flex;flex-wrap:wrap;justify-content:center;gap:7px 11px;overflow:visible;white-space:normal;padding:10px 8px;scrollbar-width:none}
+ nav a{font-size:clamp(10px,2.6vw,12px);flex-shrink:0;padding:3px 0}
  .hero{min-height:310px;padding:32px 15px}.hero h2{font-size:25px}.hero p{font-size:14px;line-height:1.55}
  .hero-actions{gap:7px}.hero-actions .btn{width:auto;max-width:none;flex:1 1 30%;min-width:90px;padding:10px 6px;font-size:11px;line-height:1.35}
  section{padding:22px 10px}h2{font-size:22px}.section-intro{font-size:13px;margin-bottom:15px}
@@ -90,12 +90,12 @@
 </div>
 </section>
 <section>
-<div class="banner"><div><h2>WhatsApp Ordering</h2>
-<div class="info" style="text-align:center">
-अपनी शॉपिंग लिस्ट, दुकान का नाम और डिलीवरी पता
-WhatsApp पर भेजें।
-<p>WhatsApp ऑर्डर बटन जल्द सक्रिय होगा।</p>
-</div></div>
+<div class="banner ordering-panel"><div style="width:100%"><h2>WhatsApp Ordering</h2>
+<div class="info" style="text-align:center;color:#29243a">
+<p style="margin-top:0">अपनी शॉपिंग लिस्ट, दुकान का नाम और डिलीवरी पता लिखकर WhatsApp पर भेजने के लिए संदेश तैयार करें।</p>
+<a class="btn" id="whatsappOrder" href="https://api.whatsapp.com/send?text=%E0%A4%A8%E0%A4%AE%E0%A4%B8%E0%A5%8D%E0%A4%A4%E0%A5%87" target="_blank" rel="noopener noreferrer">WhatsApp पर संदेश तैयार करें</a>
+<p style="font-size:12px;color:#655b70;margin-bottom:0">WhatsApp खुलने पर भेजने वाला संपर्क चुनें। सेवा और ऑर्डर की पुष्टि अलग से होगी।</p>
+</div></div></div>
 </section>
 <footer>
 <b>Mirzapur Home Service</b>
@@ -103,6 +103,9 @@ WhatsApp पर भेजें।
 <small>Serving Mirzapur, Uttar Pradesh</small>
 </footer>
 <script type="module">
+// WhatsApp opens with a prefilled message; the user chooses the recipient.
+const orderMessage = 'नमस्ते, मुझे Mirzapur Home Service से सामान मंगाना है।\nशॉपिंग लिस्ट: \nदुकान का नाम: \nडिलीवरी पता: \nमेरा नाम: ';
+document.getElementById('whatsappOrder').href = 'https://api.whatsapp.com/send?text=' + encodeURIComponent(orderMessage);
 // A single Firestore document read per page load. No live listener or repeated polling.
 const fallbackPlans = [
   {id:'monthly',name:'Monthly Plan',price:399,days:30,services:15},
