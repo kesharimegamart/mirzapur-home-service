@@ -1,148 +1,80 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin | Mirzapur Home Service</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:16px system-ui,Arial,sans-serif;background:#f6f2ff;color:#28143f}header{background:#59209d;color:white;text-align:center;padding:25px 12px}header h1{margin:0 0 8px;font-size:26px}main{max-width:980px;margin:22px auto;padding:0 14px}.card{background:white;padding:22px;border-radius:16px;margin-bottom:16px;box-shadow:0 4px 16px #ddd2ed}input,select{width:100%;padding:13px;margin:8px 0;border:1px solid #bbb;border-radius:9px;font:inherit}button{background:#6225ab;color:white;border:0;padding:12px 20px;border-radius:9px;font:inherit;cursor:pointer;margin:5px 5px 5px 0}button:disabled{opacity:.6;cursor:not-allowed}.hide{display:none!important}#status{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.5}.error{color:#b42318}.success{color:#147d3d}.muted{color:#655b70;font-size:14px}.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:580px}th,td{padding:12px 9px;text-align:left;border-bottom:1px solid #e8e1ef;font-size:14px;overflow-wrap:anywhere}th{background:#f7f2ff}.pill{display:inline-block;padding:4px 9px;border-radius:20px;background:#eee6fa}.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.toolbar input{max-width:350px}a{color:#59209d}.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.field label{display:block;font-weight:600;font-size:14px}.plan-card{border:1px solid #e5d9f3;border-radius:12px;padding:15px;margin:12px 0}.plan-card h3{margin:0 0 10px}.notice{background:#fff8e6;border-radius:9px;padding:12px;font-size:14px}.small{font-size:13px}
+</style>
+</head>
+<body>
+<header><h1>🏠 Mirzapur Home Service</h1><div>Secure Admin Dashboard</div></header>
+<main>
+<section class="card" id="loginPanel"><h2>Admin Login</h2><form id="loginForm"><label for="email">Admin Email</label><input type="email" id="email" autocomplete="username" required><label for="password">Password</label><input type="password" id="password" autocomplete="current-password" required><button id="loginBtn" type="submit">Login</button></form></section>
+<section id="dashboard" class="hide">
+<div class="card"><h2>Admin Dashboard</h2><p class="success">✓ Admin पहचान सत्यापित है।</p><p id="adminEmail" class="muted"></p><button id="refreshBtn" type="button">Refresh Customers</button><button id="logoutBtn" type="button">Logout</button></div>
+<div class="card"><h2>Registered Customers <span id="customerCount" class="pill">0</span></h2><p class="muted">यह सूची केवल पढ़ने के लिए है। Payment और Referral Credit की सुविधा सुरक्षा नियम तैयार होने के बाद जोड़ी जाएगी।</p><div class="toolbar"><input id="search" placeholder="नाम, मोबाइल या ईमेल खोजें" aria-label="Search customers"></div><p id="customerMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>नाम</th><th>मोबाइल</th><th>ईमेल</th><th>Referral</th><th>Subscription</th><th>Registration</th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
+<div class="card" id="settingsPanel"><h2>Business Settings</h2><p class="muted">Settings को जरूरत पड़ने पर Load करें। Save केवल बटन दबाने पर होगा।</p><button type="button" id="loadSettings">Load Settings</button><p id="settingsMessage" role="status"></p><form id="settingsForm" class="hide"><h3>Payment Settings</h3><div class="settings-grid"><div class="field"><label for="upiId">UPI ID</label><input id="upiId" maxlength="100" placeholder="name@bank"></div><div class="field"><label for="receiverName">Receiver Name</label><input id="receiverName" maxlength="100" placeholder="Business name"></div><div class="field"><label for="commission">Referral Commission (%)</label><input id="commission" type="number" min="0" max="100" step="0.01" required></div><div class="field"><label for="upiEnabled">UPI Payments</label><select id="upiEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div></div><h3>Subscription Plans</h3><div id="planFields"></div><p class="notice">ये Settings भविष्य के नए Orders के लिए होंगी। मौजूदा ग्राहक की खरीदी हुई Plan Terms को अलग रिकॉर्ड में सुरक्षित रखना होगा। Payment Approval और Commission Credit अभी उपलब्ध नहीं हैं।</p><button id="saveSettings" type="submit">Save Business Settings</button></form></div>
+<div class="card"><h2>आगे जोड़े जाने वाले Modules</h2><p>Payment Verification, Plan Activation / Upgrade, Remaining Services, Referral Commission और Wallet Ledger.</p><p class="muted">इनमें से कोई भी Payment या Credit कार्रवाई इस पेज से अभी नहीं की जा सकती।</p></div>
+</section>
+<div class="card"><h3>System Status</h3><div id="status" role="status" aria-live="polite">Firebase से कनेक्ट हो रहा है...</div></div>
+</main>
+<script type="module">
+const $=id=>document.getElementById(id);
+const status=$('status');
+const showStatus=(message,error=false)=>{status.textContent=message;status.className=error?'error':''};
+let auth,db,signOut,getDocs,collection,doc,getDoc,setDoc,serverTimestamp,adminVerified=false,customers=[];
+const defaults=[{id:'monthly',name:'Monthly Plan',price:399,days:30,services:15},{id:'quarterly',name:'3 Months Plan',price:1099,days:90,services:45},{id:'halfyearly',name:'6 Months Plan',price:2099,days:180,services:90},{id:'yearly',name:'Yearly Plan',price:3999,days:365,services:180}];
+const settingsRef=()=>doc(db,'businessSettings','public');
+function drawPlans(plans){const root=$('planFields');root.replaceChildren();for(const p of defaults){const current=plans.find(x=>x.id===p.id)||p;const card=document.createElement('div');card.className='plan-card';const heading=document.createElement('h3');heading.textContent=p.name;card.append(heading);const grid=document.createElement('div');grid.className='settings-grid';for(const [key,label] of [['price','Price (₹)'],['days','Validity (days)'],['services','Number of Services']]){const wrap=document.createElement('div');wrap.className='field';const lab=document.createElement('label');lab.textContent=label;const inp=document.createElement('input');inp.type='number';inp.min=key==='price'?'1':'1';inp.max='1000000';inp.step='1';inp.required=true;inp.id=`plan-${p.id}-${key}`;inp.value=String(current[key]??p[key]);lab.htmlFor=inp.id;wrap.append(lab,inp);grid.append(wrap)}card.append(grid);root.append(card)}}
+async function loadSettings(){if(!adminVerified)return;$('loadSettings').disabled=true;$('settingsMessage').textContent='Settings लोड हो रही हैं...';try{const snap=await getDoc(settingsRef());const d=snap.exists()?snap.data():{};$('upiId').value=d.upiId||'';$('receiverName').value=d.receiverName||'';$('commission').value=Number.isFinite(d.referralCommissionPercent)?String(d.referralCommissionPercent):'10';$('upiEnabled').value=d.upiEnabled===false?'false':'true';drawPlans(Array.isArray(d.plans)?d.plans:defaults);$('settingsForm').classList.remove('hide');$('settingsMessage').textContent=snap.exists()?'Saved Settings लोड हो गई हैं।':'अभी Settings सेव नहीं हैं। Default Plans दिख रहे हैं; Save करने पर रिकॉर्ड बनेगा।'}catch(e){$('settingsMessage').textContent='Settings नहीं खुलीं: '+(e.code||e.message)}finally{$('loadSettings').disabled=false}}
+async function saveSettings(e){e.preventDefault();if(!adminVerified)return;const upiId=$('upiId').value.trim(),receiverName=$('receiverName').value.trim(),commission=Number($('commission').value);if(upiId&&!/^[a-zA-Z0-9._-]{2,}@[a-zA-Z0-9.-]{2,}$/.test(upiId)){ $('settingsMessage').textContent='UPI ID का Format जाँचें।';return}if(!Number.isFinite(commission)||commission<0||commission>100){$('settingsMessage').textContent='Commission 0 से 100% होना चाहिए।';return}const plans=defaults.map(p=>{const obj={id:p.id,name:p.name};for(const key of ['price','days','services']){const n=Number($(`plan-${p.id}-${key}`).value);if(!Number.isSafeInteger(n)||n<1||n>1000000)throw Error(p.name+' के '+key+' का मान सही नहीं है।');obj[key]=n}return obj});const payload={upiId,receiverName,upiEnabled:$('upiEnabled').value==='true',referralCommissionPercent:commission,plans,updatedAt:serverTimestamp()};$('saveSettings').disabled=true;$('settingsMessage').textContent='Settings सेव हो रही हैं...';try{await setDoc(settingsRef(),payload);$('settingsMessage').textContent='Settings Firebase में सेव हो गई हैं। Home Page पर दिखाने के लिए index.html का अगला अपडेट जरूरी है।'}catch(err){$('settingsMessage').textContent='Save नहीं हुआ: '+(err.code||err.message)+'. Firestore Rules में Admin-only settings write permission जाँचें।'}finally{$('saveSettings').disabled=false}}
 
-rules_version = '2';
-
-service cloud.firestore {
-  match /databases/{database}/documents {
-
-    // Login check
-    function signedIn() {
-      return request.auth != null;
-    }
-
-    // Verified Admin check
-    function isAdmin() {
-      return signedIn()
-        && exists(
-          /databases/$(database)/documents/admins/$(request.auth.uid)
-        )
-        && get(
-          /databases/$(database)/documents/admins/$(request.auth.uid)
-        ).data.active == true;
-    }
-
-    // ADMIN ACCOUNTS
-    match /admins/{userId} {
-      allow get: if signedIn()
-        && request.auth.uid == userId;
-
-      allow list: if false;
-      allow create, update, delete: if false;
-    }
-
-    // CUSTOMER REGISTRATION
-    match /customers/{userId} {
-
-      allow create: if signedIn()
-        && request.auth.uid == userId
-        && request.resource.data.keys().hasOnly([
-          'name',
-          'mobile',
-          'phone',
-          'email',
-          'referralCode',
-          'referralCodeUsed',
-          'referredBy',
-          'subscriptionStatus',
-          'createdAt'
-        ])
-        && request.resource.data.keys().hasAll([
-          'name',
-          'email',
-          'createdAt'
-        ])
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.email
-          == request.auth.token.email
-        && request.resource.data.createdAt
-          == request.time
-        && (
-          !('mobile' in request.resource.data)
-          || request.resource.data.mobile is string
-        )
-        && (
-          !('phone' in request.resource.data)
-          || request.resource.data.phone is string
-        )
-        && (
-          !('subscriptionStatus' in request.resource.data)
-          || request.resource.data.subscriptionStatus
-            == 'inactive'
-        )
-        && (
-          !('referralCode' in request.resource.data)
-          || request.resource.data.referralCode is string
-        )
-        && (
-          !('referralCodeUsed' in request.resource.data)
-          || request.resource.data.referralCodeUsed is string
-        )
-        && (
-          !('referredBy' in request.resource.data)
-          || request.resource.data.referredBy is string
-        );
-
-      // Customer reads own record;
-      // Admin reads all customer records
-      allow get: if signedIn()
-        && (
-          request.auth.uid == userId
-          || isAdmin()
-        );
-
-      allow list: if isAdmin();
-
-      // No customer-side activation or editing
-      allow update, delete: if false;
-    }
-
-    // BUSINESS SETTINGS
-    // Matches admin.html:
-    // doc(db, 'businessSettings', 'public')
-    match /businessSettings/{settingId} {
-
-      // Plans and UPI settings are public
-      allow get: if settingId == 'public';
-
-      allow list: if false;
-
-      // Only verified Admin can save settings
-      allow create, update: if settingId == 'public'
-        && isAdmin()
-        && request.resource.data.keys().hasOnly([
-          'upiId',
-          'receiverName',
-          'upiEnabled',
-          'referralCommissionPercent',
-          'plans',
-          'updatedAt'
-        ])
-        && request.resource.data.keys().hasAll([
-          'upiId',
-          'receiverName',
-          'upiEnabled',
-          'referralCommissionPercent',
-          'plans',
-          'updatedAt'
-        ])
-        && request.resource.data.upiId is string
-        && request.resource.data.upiId.size() <= 100
-        && request.resource.data.receiverName is string
-        && request.resource.data.receiverName.size() <= 100
-        && request.resource.data.upiEnabled is bool
-        && request.resource.data.referralCommissionPercent is number
-        && request.resource.data.referralCommissionPercent >= 0
-        && request.resource.data.referralCommissionPercent <= 100
-        && request.resource.data.plans is list
-        && request.resource.data.plans.size() == 4
-        && request.resource.data.updatedAt == request.time;
-
-      allow delete: if false;
-    }
-
-    // BLOCK ALL OTHER DATABASE ACCESS
-    match /{document=**} {
-      allow read, write: if false;
-    }
-  }
+function renderCustomers(){
+ const term=$('search').value.trim().toLowerCase();
+ const filtered=customers.filter(c=>[c.name,c.mobile,c.phone,c.email,c.referralCodeUsed,c.referredBy].some(v=>String(v||'').toLowerCase().includes(term)));
+ $('customerRows').replaceChildren();
+ for(const c of filtered){
+  const tr=document.createElement('tr');
+  let date='—';try{const ts=c.createdAt;if(ts&&typeof ts.toDate==='function')date=ts.toDate().toLocaleDateString('hi-IN')}catch{}
+  const values=[c.name||'—',c.mobile||c.phone||'—',c.email||'—',c.referralCodeUsed||c.referredBy||'—',c.subscriptionStatus||'inactive',date];
+  for(const value of values){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}
+  $('customerRows').append(tr);
+ }
+ $('customerCount').textContent=String(customers.length);
+ $('customerMessage').textContent=customers.length?`${filtered.length} ग्राहक दिख रहे हैं।`:'कोई ग्राहक रिकॉर्ड नहीं मिला।';
 }
+async function loadCustomers(){
+ if(!adminVerified)return;
+ $('refreshBtn').disabled=true;$('customerMessage').textContent='ग्राहक सूची लोड हो रही है...';
+ try{const snap=await getDocs(collection(db,'customers'));customers=snap.docs.map(d=>({uid:d.id,...d.data()}));renderCustomers();showStatus('Admin Verified • Customer List Updated');}
+ catch(err){$('customerMessage').textContent='Customer List नहीं खुली: '+(err.code||err.message);showStatus('Firestore Rules में Admin को customers Collection पढ़ने की अनुमति जाँचनी होगी।',true)}
+ finally{$('refreshBtn').disabled=false}
+}
+function hideDashboard(){$('settingsForm').classList.add('hide');$('settingsMessage').textContent='';adminVerified=false;customers=[];$('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide');$('customerRows').replaceChildren();$('customerCount').textContent='0'}
+async function verifyAdmin(user){
+ if(!user){hideDashboard();showStatus('Admin Login करें।');return}
+ try{
+  const snapshot=await getDoc(doc(db,'admins',user.uid));
+  if(!snapshot.exists()||snapshot.data().active!==true){hideDashboard();showStatus('इस अकाउंट को Admin अनुमति नहीं मिली है।',true);await signOut(auth);return}
+  adminVerified=true;$('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide');$('adminEmail').textContent=user.email||'';$('password').value='';showStatus('Admin Verified Successfully!');await loadCustomers();
+ }catch(err){hideDashboard();showStatus('Admin Verification Failed: '+(err.code||err.message),true)}
+}
+try{
+ const config=await import('./firebase-config.js');auth=config.auth;db=config.db;
+ const authLib=await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
+ const fs=await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
+ signOut=authLib.signOut;({getDocs,collection,doc,getDoc,setDoc,serverTimestamp}=fs);
+ $('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('loginBtn').disabled=true;showStatus('Login जाँच रहे हैं...');
+  try{await authLib.signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}
+  catch(err){showStatus('Login Error: '+(err.code||err.message),true)}
+  finally{$('loginBtn').disabled=false}
+ });
+ $('logoutBtn').addEventListener('click',async()=>{try{await signOut(auth)}catch(err){showStatus('Logout Error: '+err.message,true)}});
+ $('loadSettings').addEventListener('click',loadSettings);$('settingsForm').addEventListener('submit',e=>{void saveSettings(e).catch(err=>{$('settingsMessage').textContent=err.message})});$('refreshBtn').addEventListener('click',loadCustomers);$('search').addEventListener('input',renderCustomers);
+ authLib.onAuthStateChanged(auth,user=>{void verifyAdmin(user)});
+}catch(err){showStatus('Firebase Load Error: '+(err.code||err.message),true)}
+</script>
+</body>
+</html>
