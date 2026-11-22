@@ -15,6 +15,7 @@
 <div class="card"><h2>Admin Dashboard</h2><p class="success">✓ Admin पहचान सत्यापित है।</p><p id="adminEmail" class="muted"></p><button id="refreshBtn" type="button">Refresh Customers</button><button id="logoutBtn" type="button">Logout</button></div>
 <div class="card"><h2>Registered Customers <span id="customerCount" class="pill">0</span></h2><p class="muted">यह सूची केवल पढ़ने के लिए है। Payment और Referral Credit की सुविधा सुरक्षा नियम तैयार होने के बाद जोड़ी जाएगी।</p><div class="toolbar"><input id="search" placeholder="नाम, मोबाइल या ईमेल खोजें" aria-label="Search customers"></div><p id="customerMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>नाम</th><th>मोबाइल</th><th>ईमेल</th><th>Referral</th><th>Subscription</th><th>Registration</th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
 <div class="card"><h2>🎁 Referral Management</h2><p class="muted">ग्राहकों के Referral Code और किसने किसका कोड इस्तेमाल किया है, इसकी जानकारी। यह केवल समीक्षा है; कोई कमीशन अपने आप क्रेडिट नहीं होता।</p><div class="toolbar"><input id="refSearch" placeholder="Referral Code, नाम या ईमेल खोजें" aria-label="Search referrals"></div><p id="refMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>ग्राहक</th><th>अपना Referral Code</th><th>इस्तेमाल किया गया Code</th><th>इस Code से रजिस्ट्रेशन</th><th>स्थिति</th></tr></thead><tbody id="refRows"></tbody></table></div><p class="notice">Commission केवल सत्यापित Subscription Payment के बाद सुरक्षित Backend द्वारा दिया जाएगा। यहाँ दिखाई गई Referral संख्या से Payment या Commission की पुष्टि नहीं होती।</p></div>
+<div class="card"><h2>💳 Payment Requests <span id="paymentCount" class="pill">0</span></h2><p class="muted">Cash/UPI Requests की समीक्षा करें। Pending का मतलब भुगतान प्राप्त होना नहीं है। बैंक/कैश रिकॉर्ड से पुष्टि जरूरी है।</p><button id="refreshPayments" type="button">Refresh Payment Requests</button><p id="paymentMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>ग्राहक</th><th>Plan</th><th>रकम</th><th>तरीका</th><th>UTR</th><th>Note</th><th>Status</th><th>Request Date</th></tr></thead><tbody id="paymentRows"></tbody></table></div><p class="notice">अभी यह Read-only समीक्षा है। Approval, Subscription Activation और Commission Credit सुरक्षित Backend तैयार होने के बाद ही जोड़े जाएँगे।</p></div>
 <div class="card" id="settingsPanel"><h2>Business Settings</h2><p class="muted">Settings को जरूरत पड़ने पर Load करें। Save केवल बटन दबाने पर होगा।</p><button type="button" id="loadSettings">Load Settings</button><p id="settingsMessage" role="status"></p><form id="settingsForm" class="hide"><h3>Payment Settings</h3><div class="settings-grid"><div class="field"><label for="upiId">UPI ID</label><input id="upiId" maxlength="100" placeholder="name@bank"></div><div class="field"><label for="receiverName">Receiver Name</label><input id="receiverName" maxlength="100" placeholder="Business name"></div><div class="field"><label for="commission">Referral Commission (%)</label><input id="commission" type="number" min="0" max="100" step="0.01" required></div><div class="field"><label for="upiEnabled">UPI Payments</label><select id="upiEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div></div><h3>Subscription Plans</h3><div id="planFields"></div><p class="notice">ये Settings भविष्य के नए Orders के लिए होंगी। मौजूदा ग्राहक की खरीदी हुई Plan Terms को अलग रिकॉर्ड में सुरक्षित रखना होगा। Payment Approval और Commission Credit अभी उपलब्ध नहीं हैं।</p><button id="saveSettings" type="submit">Save Business Settings</button></form></div>
 <div class="card"><h2>आगे जोड़े जाने वाले Modules</h2><p>Payment Verification, Plan Activation / Upgrade, Remaining Services, Referral Commission और Wallet Ledger.</p><p class="muted">इनमें से कोई भी Payment या Credit कार्रवाई इस पेज से अभी नहीं की जा सकती।</p></div>
 </section>
@@ -61,13 +62,36 @@ async function loadCustomers(){
  catch(err){$('customerMessage').textContent='Customer List नहीं खुली: '+(err.code||err.message);showStatus('Firestore Rules में Admin को customers Collection पढ़ने की अनुमति जाँचनी होगी।',true)}
  finally{$('refreshBtn').disabled=false}
 }
-function hideDashboard(){$('settingsForm').classList.add('hide');$('settingsMessage').textContent='';adminVerified=false;customers=[];$('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide');$('customerRows').replaceChildren();$('customerCount').textContent='0';$('refRows').replaceChildren();$('refMessage').textContent=''}
+async function loadPayments(){
+ if(!adminVerified)return;
+ $('refreshPayments').disabled=true;$('paymentMessage').textContent='Payment Requests लोड हो रही हैं...';
+ try{
+  const snap=await getDocs(collection(db,'paymentRequests'));
+  const customerByUid=new Map(customers.map(c=>[c.uid,c]));
+  const records=snap.docs.map(d=>({id:d.id,...d.data()}));
+  records.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  $('paymentRows').replaceChildren();
+  for(const r of records){
+   const c=customerByUid.get(r.customerUid);
+   const date=r.createdAt?.toDate?.()?.toLocaleString('hi-IN')||'—';
+   const values=[c?.name||r.customerEmail||r.customerUid||'—',r.planName||r.planId||'—','₹'+String(r.amount??'—'),r.method||'—',r.utr||'—',r.note||'—',r.status||'—',date];
+   const tr=document.createElement('tr');
+   for(const v of values){const td=document.createElement('td');td.textContent=String(v);tr.append(td)}
+   $('paymentRows').append(tr);
+  }
+  $('paymentCount').textContent=String(records.length);
+  $('paymentMessage').textContent=records.length?`${records.length} Requests मिलीं; ${records.filter(r=>r.status==='pending').length} Pending हैं।`:'अभी कोई Payment Request नहीं मिली।';
+ }catch(err){$('paymentMessage').textContent='Payment Requests नहीं खुलीं: '+(err.code||err.message)}
+ finally{$('refreshPayments').disabled=false}
+}
+
+function hideDashboard(){$('settingsForm').classList.add('hide');$('settingsMessage').textContent='';adminVerified=false;customers=[];$('dashboard').classList.add('hide');$('loginPanel').classList.remove('hide');$('customerRows').replaceChildren();$('customerCount').textContent='0';$('refRows').replaceChildren();$('refMessage').textContent='';$('paymentRows').replaceChildren();$('paymentCount').textContent='0';$('paymentMessage').textContent=''}
 async function verifyAdmin(user){
  if(!user){hideDashboard();showStatus('Admin Login करें।');return}
  try{
   const snapshot=await getDoc(doc(db,'admins',user.uid));
   if(!snapshot.exists()||snapshot.data().active!==true){hideDashboard();showStatus('इस अकाउंट को Admin अनुमति नहीं मिली है।',true);await signOut(auth);return}
-  adminVerified=true;$('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide');$('adminEmail').textContent=user.email||'';$('password').value='';showStatus('Admin Verified Successfully!');await loadCustomers();
+  adminVerified=true;$('loginPanel').classList.add('hide');$('dashboard').classList.remove('hide');$('adminEmail').textContent=user.email||'';$('password').value='';showStatus('Admin Verified Successfully!');await loadCustomers();await loadPayments();
  }catch(err){hideDashboard();showStatus('Admin Verification Failed: '+(err.code||err.message),true)}
 }
 try{
@@ -82,7 +106,7 @@ try{
   finally{$('loginBtn').disabled=false}
  });
  $('logoutBtn').addEventListener('click',async()=>{try{await signOut(auth)}catch(err){showStatus('Logout Error: '+err.message,true)}});
- $('loadSettings').addEventListener('click',loadSettings);$('settingsForm').addEventListener('submit',e=>{void saveSettings(e).catch(err=>{$('settingsMessage').textContent=err.message})});$('refreshBtn').addEventListener('click',loadCustomers);$('search').addEventListener('input',renderCustomers);$('refSearch').addEventListener('input',renderReferrals);
+ $('loadSettings').addEventListener('click',loadSettings);$('settingsForm').addEventListener('submit',e=>{void saveSettings(e).catch(err=>{$('settingsMessage').textContent=err.message})});$('refreshBtn').addEventListener('click',async()=>{await loadCustomers();await loadPayments()});$('refreshPayments').addEventListener('click',loadPayments);$('search').addEventListener('input',renderCustomers);$('refSearch').addEventListener('input',renderReferrals);
  authLib.onAuthStateChanged(auth,user=>{void verifyAdmin(user)});
 }catch(err){showStatus('Firebase Load Error: '+(err.code||err.message),true)}
 </script>
