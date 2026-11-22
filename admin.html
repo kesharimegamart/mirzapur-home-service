@@ -13,11 +13,11 @@
 <section class="card" id="loginPanel"><h2>Admin Login</h2><form id="loginForm"><label for="email">Admin Email</label><input type="email" id="email" autocomplete="username" required><label for="password">Password</label><input type="password" id="password" autocomplete="current-password" required><button id="loginBtn" type="submit">Login</button></form></section>
 <section id="dashboard" class="hide">
 <div class="card"><h2>Admin Dashboard</h2><p class="success">✓ Admin पहचान सत्यापित है।</p><p id="adminEmail" class="muted"></p><button id="refreshBtn" type="button">Refresh Customers</button><button id="logoutBtn" type="button">Logout</button></div>
-<div class="card"><h2>Registered Customers <span id="customerCount" class="pill">0</span></h2><p class="muted">यह सूची केवल पढ़ने के लिए है। Payment और Referral Credit की सुविधा सुरक्षा नियम तैयार होने के बाद जोड़ी जाएगी।</p><div class="toolbar"><input id="search" placeholder="नाम, मोबाइल या ईमेल खोजें" aria-label="Search customers"></div><p id="customerMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>नाम</th><th>मोबाइल</th><th>ईमेल</th><th>Referral</th><th>Subscription</th><th>Registration</th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
+<div class="card"><h2>Registered Customers <span id="customerCount" class="pill">0</span></h2><p class="muted">यह सूची केवल पढ़ने के लिए है। Payment Approval के लिए Firebase Security Rules भी अपडेट करना जरूरी है।</p><div class="toolbar"><input id="search" placeholder="नाम, मोबाइल या ईमेल खोजें" aria-label="Search customers"></div><p id="customerMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>नाम</th><th>मोबाइल</th><th>ईमेल</th><th>Referral</th><th>Subscription</th><th>Registration</th></tr></thead><tbody id="customerRows"></tbody></table></div></div>
 <div class="card"><h2>🎁 Referral Management</h2><p class="muted">ग्राहकों के Referral Code और किसने किसका कोड इस्तेमाल किया है, इसकी जानकारी। यह केवल समीक्षा है; कोई कमीशन अपने आप क्रेडिट नहीं होता।</p><div class="toolbar"><input id="refSearch" placeholder="Referral Code, नाम या ईमेल खोजें" aria-label="Search referrals"></div><p id="refMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>ग्राहक</th><th>अपना Referral Code</th><th>इस्तेमाल किया गया Code</th><th>इस Code से रजिस्ट्रेशन</th><th>स्थिति</th></tr></thead><tbody id="refRows"></tbody></table></div><p class="notice">Commission केवल सत्यापित Subscription Payment के बाद सुरक्षित Backend द्वारा दिया जाएगा। यहाँ दिखाई गई Referral संख्या से Payment या Commission की पुष्टि नहीं होती।</p></div>
-<div class="card"><h2>💳 Payment Requests <span id="paymentCount" class="pill">0</span></h2><p class="muted">Cash/UPI Requests की समीक्षा करें। Pending का मतलब भुगतान प्राप्त होना नहीं है। बैंक/कैश रिकॉर्ड से पुष्टि जरूरी है। Reject केवल गलत या रद्द अनुरोध पर करें।</p><button id="refreshPayments" type="button">Refresh Payment Requests</button><p id="paymentMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>ग्राहक</th><th>Plan</th><th>रकम</th><th>तरीका</th><th>UTR</th><th>Note</th><th>Status</th><th>Request Date</th><th>Review</th></tr></thead><tbody id="paymentRows"></tbody></table></div><p class="notice">Reject बटन अगले Firebase Rules अपडेट के बाद काम करेगा। Approve, Subscription Activation और Commission Credit अभी उपलब्ध नहीं हैं।</p></div>
-<div class="card" id="settingsPanel"><h2>Business Settings</h2><p class="muted">Settings को जरूरत पड़ने पर Load करें। Save केवल बटन दबाने पर होगा।</p><button type="button" id="loadSettings">Load Settings</button><p id="settingsMessage" role="status"></p><form id="settingsForm" class="hide"><h3>Payment Settings</h3><div class="settings-grid"><div class="field"><label for="upiId">UPI ID</label><input id="upiId" maxlength="100" placeholder="name@bank"></div><div class="field"><label for="receiverName">Receiver Name</label><input id="receiverName" maxlength="100" placeholder="Business name"></div><div class="field"><label for="commission">Referral Commission (%)</label><input id="commission" type="number" min="0" max="100" step="0.01" required></div><div class="field"><label for="upiEnabled">UPI Payments</label><select id="upiEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div></div><h3>Subscription Plans</h3><div id="planFields"></div><p class="notice">ये Settings भविष्य के नए Orders के लिए होंगी। मौजूदा ग्राहक की खरीदी हुई Plan Terms को अलग रिकॉर्ड में सुरक्षित रखना होगा। Payment Approval और Commission Credit अभी उपलब्ध नहीं हैं।</p><button id="saveSettings" type="submit">Save Business Settings</button></form></div>
-<div class="card"><h2>आगे जोड़े जाने वाले Modules</h2><p>Payment Verification, Plan Activation / Upgrade, Remaining Services, Referral Commission और Wallet Ledger.</p><p class="muted">इनमें से कोई भी Payment या Credit कार्रवाई इस पेज से अभी नहीं की जा सकती।</p></div>
+<div class="card"><h2>💳 Payment Requests <span id="paymentCount" class="pill">0</span></h2><p class="muted">Cash/UPI Requests की समीक्षा करें। Pending का मतलब भुगतान प्राप्त होना नहीं है। बैंक/कैश रिकॉर्ड से पुष्टि जरूरी है। Reject केवल गलत या रद्द अनुरोध पर करें।</p><button id="refreshPayments" type="button">Refresh Payment Requests</button><p id="paymentMessage" role="status"></p><div class="table-wrap"><table><thead><tr><th>ग्राहक</th><th>Plan</th><th>रकम</th><th>तरीका</th><th>UTR</th><th>Note</th><th>Status</th><th>Request Date</th><th>Review</th></tr></thead><tbody id="paymentRows"></tbody></table></div><p class="notice">Approve/Reject केवल सत्यापित भुगतान पर करें। Upgrade में पुरानी बची रकम का समायोजन नए Payment Request सिस्टम से होगा।</p></div>
+<div class="card"><h2>📋 Subscription & Payment History</h2><p class="muted">ग्राहकों की वर्तमान स्थिति और Payment Requests ऊपर की सूची में दिखती हैं। सक्रिय प्लान की समाप्ति तिथि के बाद सेवा अपने आप अमान्य मानी जाएगी।</p><div class="table-wrap"><table><thead><tr><th>ग्राहक</th><th>प्लान</th><th>समाप्ति</th><th>बची सर्विस</th><th>स्थिति</th></tr></thead><tbody id="subscriptionRows"></tbody></table></div></div><div class="card" id="settingsPanel"><h2>Business Settings</h2><p class="muted">Settings को जरूरत पड़ने पर Load करें। Save केवल बटन दबाने पर होगा।</p><button type="button" id="loadSettings">Load Settings</button><p id="settingsMessage" role="status"></p><form id="settingsForm" class="hide"><h3>Payment Settings</h3><div class="settings-grid"><div class="field"><label for="upiId">UPI ID</label><input id="upiId" maxlength="100" placeholder="name@bank"></div><div class="field"><label for="receiverName">Receiver Name</label><input id="receiverName" maxlength="100" placeholder="Business name"></div><div class="field"><label for="commission">Referral Commission (%)</label><input id="commission" type="number" min="0" max="100" step="0.01" required></div><div class="field"><label for="upiEnabled">UPI Payments</label><select id="upiEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></div></div><h3>Subscription Plans</h3><div id="planFields"></div><p class="notice">ये Settings भविष्य के नए Orders के लिए होंगी। मौजूदा ग्राहक की खरीदी हुई Plan Terms को अलग रिकॉर्ड में सुरक्षित रखना होगा। Referral Commission और Active Plan Upgrade अलग सुरक्षित चरण में जोड़े जाएँगे।</p><button id="saveSettings" type="submit">Save Business Settings</button></form></div>
+<div class="card"><h2>आगे जोड़े जाने वाले Modules</h2><p>Payment Verification, Plan Activation / Upgrade, Remaining Services, Referral Commission और Wallet Ledger.</p><p class="muted">Approval केवल Firebase Rules अपडेट होने के बाद काम करेगा। Referral Credit अभी स्वचालित नहीं है।</p></div>
 </section>
 <div class="card"><h3>System Status</h3><div id="status" role="status" aria-live="polite">Firebase से कनेक्ट हो रहा है...</div></div>
 </main>
@@ -25,7 +25,7 @@
 const $=id=>document.getElementById(id);
 const status=$('status');
 const showStatus=(message,error=false)=>{status.textContent=message;status.className=error?'error':''};
-let auth,db,signOut,getDocs,collection,doc,getDoc,setDoc,updateDoc,serverTimestamp,adminVerified=false,customers=[];
+let auth,db,signOut,getDocs,collection,doc,getDoc,setDoc,updateDoc,serverTimestamp,runTransaction,Timestamp,adminVerified=false,customers=[];
 const defaults=[{id:'monthly',name:'Monthly Plan',price:399,days:30,services:15},{id:'quarterly',name:'3 Months Plan',price:1099,days:90,services:45},{id:'halfyearly',name:'6 Months Plan',price:2099,days:180,services:90},{id:'yearly',name:'Yearly Plan',price:3999,days:365,services:180}];
 const settingsRef=()=>doc(db,'businessSettings','public');
 function drawPlans(plans){const root=$('planFields');root.replaceChildren();for(const p of defaults){const current=plans.find(x=>x.id===p.id)||p;const card=document.createElement('div');card.className='plan-card';const heading=document.createElement('h3');heading.textContent=p.name;card.append(heading);const grid=document.createElement('div');grid.className='settings-grid';for(const [key,label] of [['price','Price (₹)'],['days','Validity (days)'],['services','Number of Services']]){const wrap=document.createElement('div');wrap.className='field';const lab=document.createElement('label');lab.textContent=label;const inp=document.createElement('input');inp.type='number';inp.min=key==='price'?'1':'1';inp.max='1000000';inp.step='1';inp.required=true;inp.id=`plan-${p.id}-${key}`;inp.value=String(current[key]??p[key]);lab.htmlFor=inp.id;wrap.append(lab,inp);grid.append(wrap)}card.append(grid);root.append(card)}}
@@ -43,7 +43,7 @@ function renderCustomers(){
   for(const value of values){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}
   $('customerRows').append(tr);
  }
- $('customerCount').textContent=String(customers.length);
+ renderSubscriptions();$('customerCount').textContent=String(customers.length);
  $('customerMessage').textContent=customers.length?`${filtered.length} ग्राहक दिख रहे हैं।`:'कोई ग्राहक रिकॉर्ड नहीं मिला।';
 }
 function renderReferrals(){
@@ -62,6 +62,49 @@ async function loadCustomers(){
  catch(err){$('customerMessage').textContent='Customer List नहीं खुली: '+(err.code||err.message);showStatus('Firestore Rules में Admin को customers Collection पढ़ने की अनुमति जाँचनी होगी।',true)}
  finally{$('refreshBtn').disabled=false}
 }
+
+function renderSubscriptions(){
+ const root=$('subscriptionRows');root.replaceChildren();
+ for(const c of customers){
+  const end=c.subscriptionEndAt?.toDate?.();
+  const active=c.subscriptionStatus==='active'&&end instanceof Date&&end.getTime()>Date.now();
+  const tr=document.createElement('tr');
+  for(const v of [c.name||c.email||'—',c.subscriptionPlanId||'—',end?end.toLocaleDateString('hi-IN'):'—',active?String(c.remainingServices??0):'0',active?'Active':'Inactive / Expired']){const td=document.createElement('td');td.textContent=v;tr.append(td)}
+  root.append(tr);
+ }
+}
+async function reviewPayment(requestId,action){
+ if(!adminVerified||!auth.currentUser)return;
+ const approve=action==='approved';
+ if(!confirm(approve?'क्या बैंक/कैश में भुगतान सचमुच प्राप्त हुआ है? केवल पुष्टि होने पर OK करें।':'क्या इस Pending Request को Reject करना है?'))return;
+ $('paymentMessage').textContent='रिकॉर्ड अपडेट हो रहा है...';
+ try{
+  await runTransaction(db,async tx=>{
+   const pref=doc(db,'paymentRequests',requestId);
+   const ps=await tx.get(pref);
+   if(!ps.exists()||ps.data().status!=='pending')throw Error('Request अब Pending नहीं है।');
+   const pay=ps.data();
+   const cref=doc(db,'customers',pay.customerUid);
+   const cs=await tx.get(cref);
+   if(!cs.exists())throw Error('Customer नहीं मिला।');
+   const c=cs.data();
+   const now=Timestamp.now();
+   const updates={status:action,reviewedAt:serverTimestamp(),reviewedBy:auth.currentUser.uid};
+   if(approve){
+    const end=c.subscriptionEndAt?.toDate?.();
+    if(c.subscriptionStatus==='active'&&end instanceof Date&&end.getTime()>Date.now())throw Error('ग्राहक का Active Plan है। पहले Upgrade/Renewal payment calculation और सुरक्षित नियम पूरे करें।');
+    const days=Number(pay.validityDays),services=Number(pay.services);
+    if(!Number.isSafeInteger(days)||days<1||!Number.isSafeInteger(services)||services<1)throw Error('Plan विवरण गलत है।');
+    const expiry=Timestamp.fromMillis(now.toMillis()+days*86400000);
+    tx.update(cref,{subscriptionStatus:'active',subscriptionPlanId:pay.planId,subscriptionStartAt:serverTimestamp(),subscriptionEndAt:expiry,subscriptionDays:days,subscriptionTotalServices:services,remainingServices:services,lastApprovedRequestId:requestId});
+   }
+   tx.update(pref,updates);
+  });
+  $('paymentMessage').textContent=action==='approved'?'Payment Approved; Subscription Active.':'Request Rejected.';
+  await loadCustomers();await loadPayments();
+ }catch(e){$('paymentMessage').textContent='Update नहीं हुआ: '+(e.code||e.message)}
+}
+
 async function loadPayments(){
  if(!adminVerified)return;
  $('refreshPayments').disabled=true;$('paymentMessage').textContent='Payment Requests लोड हो रही हैं...';
@@ -77,7 +120,7 @@ async function loadPayments(){
    const values=[c?.name||r.customerEmail||r.customerUid||'—',r.planName||r.planId||'—','₹'+String(r.amount??'—'),r.method||'—',r.utr||'—',r.note||'—',r.status||'—',date];
    const tr=document.createElement('tr');
    for(const v of values){const td=document.createElement('td');td.textContent=String(v);tr.append(td)}
-   $('paymentRows').append(tr);
+   const review=document.createElement('td');if(r.status==='pending'){for(const [label,action] of [['Approve','approved'],['Reject','rejected']]){const btn=document.createElement('button');btn.type='button';btn.textContent=label;btn.style.background=action==='rejected'?'#9f2839':'#147d3d';btn.addEventListener('click',()=>reviewPayment(r.id,action));review.append(btn)}}else{review.textContent='Reviewed'}tr.append(review);$('paymentRows').append(tr);
   }
   $('paymentCount').textContent=String(records.length);
   $('paymentMessage').textContent=records.length?`${records.length} Requests मिलीं; ${records.filter(r=>r.status==='pending').length} Pending हैं।`:'अभी कोई Payment Request नहीं मिली।';
@@ -98,7 +141,7 @@ try{
  const config=await import('./firebase-config.js');auth=config.auth;db=config.db;
  const authLib=await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js');
  const fs=await import('https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js');
- signOut=authLib.signOut;({getDocs,collection,doc,getDoc,setDoc,updateDoc,serverTimestamp}=fs);
+ signOut=authLib.signOut;({getDocs,collection,doc,getDoc,setDoc,updateDoc,serverTimestamp,runTransaction,Timestamp}=fs);
  $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();$('loginBtn').disabled=true;showStatus('Login जाँच रहे हैं...');
   try{await authLib.signInWithEmailAndPassword(auth,$('email').value.trim(),$('password').value)}
